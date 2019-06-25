@@ -9,6 +9,8 @@ Description: Uses read counts for biallelic SNPs to compare the likelihoods that
     correct for sequencing error rates and allelic bias.
 Imports:
 	stats
+URL: https://github.com/delomast/tripsAndDipR
+BugReports: https://github.com/delomast/tripsAndDipR/issues
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
