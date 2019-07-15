@@ -4,14 +4,20 @@
 \alias{tripsAndDip}
 \title{Uses read counts for biallelic SNPs to determine if a sample is diploid or triploid}
 \usage{
-tripsAndDip(counts, h, eps, min_reads = 30, min_loci = 15,
-  binom_p_value = 0.05)
+tripsAndDip(counts, counts_alt = NA, h, eps, min_reads = 30,
+  min_loci = 15, binom_p_value = 0.05)
 }
 \arguments{
 \item{counts}{Either a numeric matrix or a dataframe with each row corresponding to a different sample.
-The columns correspond to the read counts for each locus, in a two column per locus format:
+There are two options for formatting the input. Either
+the columns correspond to the read counts for each locus, in a two column per locus format:
 column 1 is the read counts for locus1Allele1, column two is the read counts for locus1Allele2, locus2Allele1, locus2Allele2, ...
+OR this contains read counts for the reference allele, and \code{counts_alt} contains read counts for the alternate allele
 The rownames should be the sample names.}
+
+\item{counts_alt}{This is a numeric matrix or a dataframe with each row corresponding to a different sample.
+The matrix contains counts for the alternate allele, with samples and loci having the same order as in \code{counts}
+If this parameter is NA or NULL, \code{counts} is assumed to have both the reference and alternate allele counts.}
 
 \item{h}{A numeric vector of h values for each locus in the same order that the loci are ordered in counts.
 These h values are as defined by Gerard et al. (2018) "Genotyping polyploids from messy sequencing data"

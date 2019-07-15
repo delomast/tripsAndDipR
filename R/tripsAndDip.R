@@ -10,9 +10,14 @@
 #' can be found in Delomas (xxxx) insert_full_citation_here
 #'
 #' @param counts Either a numeric matrix or a dataframe with each row corresponding to a different sample.
-#'   The columns correspond to the read counts for each locus, in a two column per locus format:
+#'   There are two options for formatting the input. Either
+#'   the columns correspond to the read counts for each locus, in a two column per locus format:
 #'   column 1 is the read counts for locus1Allele1, column two is the read counts for locus1Allele2, locus2Allele1, locus2Allele2, ...
+#'   OR this contains read counts for the reference allele, and \code{counts_alt} contains read counts for the alternate allele
 #'   The rownames should be the sample names.
+#' @param counts_alt This is a numeric matrix or a dataframe with each row corresponding to a different sample.
+#'   The matrix contains counts for the alternate allele, with samples and loci having the same order as in \code{counts}
+#'   If this parameter is NA or NULL, \code{counts} is assumed to have both the reference and alternate allele counts.
 #' @param h A numeric vector of h values for each locus in the same order that the loci are ordered in counts.
 #'   These h values are as defined by Gerard et al. (2018) "Genotyping polyploids from messy sequencing data"
 #'   with h expressed as allele2 / allele1 where allele 1 is listed before allele 2 in counts.
@@ -47,14 +52,37 @@
 #' ploidy <- tripsAndDip(allele_counts, h = h_constant, eps = eps_constant)
 #' @export
 
-tripsAndDip <- function(counts, h, eps, min_reads = 30, min_loci = 15, binom_p_value = .05){
+tripsAndDip <- function(counts, counts_alt = NA, h, eps, min_reads = 30, min_loci = 15, binom_p_value = .05){
 	### input error checking
 	if(!is.matrix(counts) && !is.data.frame(counts)){
-		stop("Error. Counts must be either a matrix or a dataframe.")
+		stop("Error. counts must be either a matrix or a dataframe.")
 	}
-	if((ncol(counts)/2) != length(h)){
-		stop("Error. The number of columns of counts is not equal to twice the length of h.")
+	if(is.na(counts_alt) || is.null(counts_alt)){
+		if((ncol(counts)/2) != length(h)){
+			stop("Error. The number of columns of counts is not equal to twice the length of h.")
+		}
+	} else {
+		if(!is.matrix(counts_alt) && !is.data.frame(counts_alt)){
+			stop("Error. counts_alt must be either a matrix or a dataframe.")
+		}
+		if(ncol(counts) != length(h)){
+			stop("Error. The number of columns of counts is not equal to the length of h.")
+		}
+		if(ncol(counts) != ncol(counts_alt)){
+			stop("Error. The number of columns of counts is not equal to the number of columns of counts_alt.")
+		}
+		if(nrow(counts) != nrow(counts_alt)){
+			stop("Error. The number of rows of counts is not equal to the number of rows of counts_alt.")
+		}
+
+		# combine counts and counts_alt
+		countsNew <- matrix(nrow = nrow(counts), ncol = 2*ncol(counts))
+		rownames(countsNew) <- rownames(counts)
+		countsNew[,seq(1, (ncol(countsNew) - 1), 2)] <- counts
+		countsNew[,seq(2, ncol(countsNew), 2)] <- counts_alt
+		counts <- countsNew
 	}
+
 	if(length(eps) != length(h)){
 		stop("Error. The length of h is not equal to the length of eps.")
 	}
