@@ -78,8 +78,10 @@ tripsAndDip <- function(counts, counts_alt = NA, h, eps, min_reads = 30, min_loc
 		# combine counts and counts_alt
 		countsNew <- matrix(nrow = nrow(counts), ncol = 2*ncol(counts))
 		rownames(countsNew) <- rownames(counts)
-		countsNew[,seq(1, (ncol(countsNew) - 1), 2)] <- counts
-		countsNew[,seq(2, ncol(countsNew), 2)] <- counts_alt
+		for (i in seq(1, (ncol(countsNew) - 1), 2)){
+			countsNew[,i] <- counts[,((i+1)/2)]
+			countsNew[,(i+1)] <- counts_alt[,((i+1)/2)]
+		}
 		counts <- countsNew
 	}
 
