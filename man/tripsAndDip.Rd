@@ -20,11 +20,11 @@ The matrix contains counts for the alternate allele, with samples and loci havin
 If this parameter is NA or NULL, \code{counts} is assumed to have both the reference and alternate allele counts.}
 
 \item{h}{A numeric vector of h values for each locus in the same order that the loci are ordered in counts.
-These h values are as defined by Gerard et al. (2018) "Genotyping polyploids from messy sequencing data"
-with h expressed as allele2 / allele1 where allele 1 is listed before allele 2 in counts.}
+These h values are as defined by Gerard et al. (2018) "Genotyping polyploids from messy sequencing data" Genetics 210:789-807.
+with h expressed as alternate / reference. These values can be estimated using the R package "updog".}
 
 \item{eps}{A numeric vector of values for the error rate per read for each locus in the same order that the loci are ordered in counts.
-These are expressed as proportions, so a rate of 1\% should be given as 0.01.}
+These are expressed as proportions, so a rate of 1\% should be given as 0.01. These values can be estimated using the R package "updog".}
 
 \item{min_reads}{The minimum number of reads to consider a locus.}
 

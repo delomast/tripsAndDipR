@@ -20,10 +20,10 @@
 #'   The matrix contains counts for the alternate allele, with samples and loci having the same order as in \code{counts}
 #'   If this parameter is NA or NULL, \code{counts} is assumed to have both the reference and alternate allele counts.
 #' @param h A numeric vector of h values for each locus in the same order that the loci are ordered in counts.
-#'   These h values are as defined by Gerard et al. (2018) "Genotyping polyploids from messy sequencing data"
-#'   with h expressed as allele2 / allele1 where allele 1 is listed before allele 2 in counts.
+#'   These h values are as defined by Gerard et al. (2018) "Genotyping polyploids from messy sequencing data" Genetics 210:789-807.
+#'   with h expressed as alternate / reference. These values can be estimated using the R package "updog".
 #' @param eps A numeric vector of values for the error rate per read for each locus in the same order that the loci are ordered in counts.
-#'   These are expressed as proportions, so a rate of 1\% should be given as 0.01.
+#'   These are expressed as proportions, so a rate of 1\% should be given as 0.01. These values can be estimated using the R package "updog".
 #' @param min_reads The minimum number of reads to consider a locus.
 #' @param min_loci The minimum number of usable loci in a sample to calculate a log-likelihood ratio.
 #' @param binom_p_value The alpha value to use when applying a binomial test to determine
