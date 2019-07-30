@@ -34,7 +34,7 @@ These are expressed as proportions, so a rate of 1\% should be given as 0.01.}
 whether to include a locus in the calculation.}
 }
 \value{
-a dataframe with column 1 containing sample names, column 2 containing calculated LLRs (larger means more likely triploid)
+a dataframe with column 1 containing sample names, column 2 containing calculated LLRs (larger means more likely given triploidy)
   and column 3 containing the number of loci used to calculate the LLR
 }
 \description{
@@ -42,8 +42,8 @@ a dataframe with column 1 containing sample names, column 2 containing calculate
 diploid or triploid based on the read counts for biallelic SNPs.
 }
 \details{
-\code{tripsAndDip} calculates log-likelihood ratios comparing whether a sample is likely
-diploid or triploid based on the read counts for biallelic SNPs.This function was designed
+\code{tripsAndDip} calculates log-likelihood ratios comparing the likelihoods of the read counts
+under diploidy or triploidy for a sample using biallelic SNPs.This function was designed
 with amplicon sequencing data in mind, but may be useful for other genotyping techniques
 that also yield read counts for each allele in a given locus. Full details of the calculations
 can be found in Delomas (2019) Differentiating diploid and triploid individuals using single
