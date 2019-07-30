@@ -11,7 +11,7 @@ tripsAndDip(counts, counts_alt = NA, h, eps, min_reads = 30,
 \item{counts}{Either a numeric matrix or a dataframe with each row corresponding to a different sample.
 There are two options for formatting the input. Either
 the columns correspond to the read counts for each locus, in a two column per locus format:
-column 1 is the read counts for locus1Allele1, column two is the read counts for locus1Allele2, locus2Allele1, locus2Allele2, ...
+column 1 is the read counts for locus1ReferenceAllele, column two is the read counts for locus1AlternateAllele2, locus2Reference, locus2Alternate, ...
 OR this contains read counts for the reference allele, and \code{counts_alt} contains read counts for the alternate allele
 The rownames should be the sample names.}
 
@@ -46,7 +46,8 @@ diploid or triploid based on the read counts for biallelic SNPs.
 diploid or triploid based on the read counts for biallelic SNPs.This function was designed
 with amplicon sequencing data in mind, but may be useful for other genotyping techniques
 that also yield read counts for each allele in a given locus. Full details of the calculations
-can be found in Delomas (xxxx) insert_full_citation_here
+can be found in Delomas (2019) Differentiating diploid and triploid individuals using single
+nucleotide polymorphisms genotyped by amplicon-sequencing. Molecular Ecology Resources.
 }
 \examples{
 # make up some data
