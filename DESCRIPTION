@@ -4,9 +4,10 @@ Title: Identification of 2n and 3n samples from amplicon sequencing data
 Version: 0.1.0
 Authors@R: person("Thomas", "Delomas", email = "thomas.delomas@idfg.idaho.gov",
   role = c("aut", "cre"))
-Description: Uses read counts for biallelic SNPs to compare the likelihoods that
-    a sample is diploid or triploid. It allows parameters to be specified to
-    account for sequencing error rates and allelic bias.
+Description: Uses read counts for biallelic SNPs to compare the likelihoods for
+    the observed read counts given that a sample is either diploid or triploid. 
+    It allows parameters to be specified to account for sequencing error rates 
+    and allelic bias.
 Imports:
 	stats
 URL: https://github.com/delomast/tripsAndDipR
