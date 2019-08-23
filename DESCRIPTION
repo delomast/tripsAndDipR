@@ -8,9 +8,7 @@ Description: Uses read counts for biallelic SNPs to compare the likelihoods for
     the observed read counts given that a sample is either diploid or triploid. 
     It allows parameters to be specified to account for sequencing error rates 
     and allelic bias. For details of the algorithm, please see
-    Delomas (2019) Differentiating diploid and triploid individuals using single 
-    nucleotide polymorphisms genotyped by amplicon-sequencing. Molecular
-    Ecology Resources. doi:10.1111/1755-0998.13073
+    Delomas (2019) <doi:10.1111/1755-0998.13073>.
 Imports:
 	stats
 URL: https://github.com/delomast/tripsAndDipR
