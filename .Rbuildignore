@@ -1,2 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^testfunc.R$
+^.*.txt$
+README.md
+.*.rda
