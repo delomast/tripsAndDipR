@@ -12,7 +12,7 @@ genoLLHsum <- function(counts, ploidies, eps) {
 }
 
 #' @export
-genoEM <- function(counts, ploidies, eps, trep) {
-    .Call(`_tripsAndDipR_genoEM`, counts, ploidies, eps, trep)
+genoEM <- function(counts, ploidy, eps, mrep, mdiff) {
+    .Call(`_tripsAndDipR_genoEM`, counts, ploidy, eps, mrep, mdiff)
 }
 
