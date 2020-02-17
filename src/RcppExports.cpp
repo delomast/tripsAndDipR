@@ -32,17 +32,19 @@ BEGIN_RCPP
 END_RCPP
 }
 // genoEM
-double genoEM(NumericVector counts, int ploidy, double eps, int mrep, double mdiff);
-RcppExport SEXP _tripsAndDipR_genoEM(SEXP countsSEXP, SEXP ploidySEXP, SEXP epsSEXP, SEXP mrepSEXP, SEXP mdiffSEXP) {
+NumericVector genoEM(NumericVector refCounts, NumericVector altCounts, int ploidy, double eps, int mrep, double mdiff, bool returnAll);
+RcppExport SEXP _tripsAndDipR_genoEM(SEXP refCountsSEXP, SEXP altCountsSEXP, SEXP ploidySEXP, SEXP epsSEXP, SEXP mrepSEXP, SEXP mdiffSEXP, SEXP returnAllSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type counts(countsSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type refCounts(refCountsSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type altCounts(altCountsSEXP);
     Rcpp::traits::input_parameter< int >::type ploidy(ploidySEXP);
     Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
     Rcpp::traits::input_parameter< int >::type mrep(mrepSEXP);
     Rcpp::traits::input_parameter< double >::type mdiff(mdiffSEXP);
-    rcpp_result_gen = Rcpp::wrap(genoEM(counts, ploidy, eps, mrep, mdiff));
+    Rcpp::traits::input_parameter< bool >::type returnAll(returnAllSEXP);
+    rcpp_result_gen = Rcpp::wrap(genoEM(refCounts, altCounts, ploidy, eps, mrep, mdiff, returnAll));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -50,7 +52,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_tripsAndDipR_testPloidy", (DL_FUNC) &_tripsAndDipR_testPloidy, 3},
     {"_tripsAndDipR_genoLLHsum", (DL_FUNC) &_tripsAndDipR_genoLLHsum, 3},
-    {"_tripsAndDipR_genoEM", (DL_FUNC) &_tripsAndDipR_genoEM, 5},
+    {"_tripsAndDipR_genoEM", (DL_FUNC) &_tripsAndDipR_genoEM, 7},
     {NULL, NULL, 0}
 };
 

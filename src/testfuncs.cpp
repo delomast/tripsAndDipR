@@ -93,29 +93,42 @@ double genoLLHsum(NumericVector counts, NumericVector ploidies, double eps) {
 // This runs EM for a given individual and ploidy, then returns the log-likelihood at the maximum
 //' @export
 // [[Rcpp::export]]
-double genoEM(NumericVector counts, int ploidy, double eps, int mrep, double mdiff) {
+NumericVector genoEM(NumericVector refCounts, NumericVector altCounts,
+              int ploidy, double eps, int mrep, double mdiff, bool returnAll) {
 	if (mrep < 1) Rcpp::stop("mrep must be 1 or greater.");
+	if (ploidy < 1) Rcpp::stop("ploidy must be 1 or greater.");
+	if (refCounts.length() != altCounts.length()) Rcpp::stop("ref and alt counts must have equal lengths.");
+
 	double ploidyD = ploidy; // switch to double for division
 	vector <double> gFreq (ploidyD+1, 1.0/(ploidyD+1)); // genome-wide freqs
 	double nLoci;
-	nLoci = counts.length() / 2.0;
-	// put calculations of p for each allele dosage and locus here, using locus specific
+	nLoci = refCounts.length();
+	// calculations of likelihood for each allele dosage and locus here, using locus specific
 	//  eps and h values
-	// use a vector of vectors with first index locus, second allele dosage
-	// actually, just calculate binomLH and save, then iterate to find gFreq
+	// first index locus, second allele dosage
+	// need to add allele specific eps and h values
+	vector <vector <double> > pAll;
+	for(int i=0; i < nLoci; i++){
+		vector <double> tempVec;
+		for(int j=0, max2=ploidyD+1; j < max2; j++ ){
+			double p = j / ploidyD;
+			p = (p)*(1 - eps) + (1 - p)*eps;
+			tempVec.push_back(binomLH(p, refCounts[i], altCounts[i]));
+		}
+		pAll.push_back(tempVec);
+	}
 	double llh;
 	double lastLlh = -10000; // just preventing division by 0 in first rep
+	int repNum = 0;
 	for(int rep = 0; rep < mrep; rep++){
 		// E- step
 		llh = 0;
 		vector <double> catCounts (ploidyD+1, 0);
-		for(int i=0, max=counts.length(); i < max; i+=2){
+		for(int i=0; i < nLoci; i++){
 			vector <double> genoProbs (ploidyD+1, 0);
 			double rSum = 0;
 			for(int j=0, max2=ploidyD+1; j < max2; j++ ){
-				double p = j / ploidyD;
-				p = (p)*(1 - eps) + (1 - p)*eps;
-				genoProbs[j] = binomLH(p, counts[i], counts[i+1]) * gFreq[j]; // is normalized in sampleC
+				genoProbs[j] = pAll[i][j] * gFreq[j];
 				rSum += genoProbs[j];
 			}
 			llh += log(rSum);
@@ -126,8 +139,17 @@ double genoEM(NumericVector counts, int ploidy, double eps, int mrep, double mdi
 
 		// M-step
 		for(int j=0, max2=ploidyD+1; j < max2; j++ ) gFreq[j] = catCounts[j] / nLoci;
+		repNum++;
 	}
 
-	return llh;
+	NumericVector returnValues;
+	returnValues.push_back(llh);
+	if(returnAll){
+		// llh, gFreqs, number of reps
+		for(int j=0, max2=ploidyD+1; j < max2; j++ ) returnValues.push_back(gFreq[j]);
+		returnValues.push_back(repNum);
+	}
+	return returnValues;
+
 }
 
