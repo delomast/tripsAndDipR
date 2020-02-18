@@ -8,9 +8,6 @@ for(i in rbinom(100, r, .75)){
 rCounts <- counts[seq(1, length(counts), 2)]
 aCounts <- counts[seq(2, length(counts), 2)]
 
-genoLLHsum(counts[1:2], 4, .01)
-genoLLHsum(counts[1:2], 6, .01)
-
 genoEM(rCounts, aCounts, 2, .01, 1000, .001, FALSE)
 genoEM(rCounts, aCounts, 3, .01, 1000, .001, FALSE)
 genoEM(rCounts, aCounts, 4, .01, 1000, .001, TRUE)

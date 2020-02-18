@@ -2,16 +2,6 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #' @export
-testPloidy <- function(counts, ploidies, eps) {
-    .Call(`_tripsAndDipR_testPloidy`, counts, ploidies, eps)
-}
-
-#' @export
-genoLLHsum <- function(counts, ploidies, eps) {
-    .Call(`_tripsAndDipR_genoLLHsum`, counts, ploidies, eps)
-}
-
-#' @export
 genoEM <- function(refCounts, altCounts, ploidy, eps, mrep, mdiff, returnAll) {
     .Call(`_tripsAndDipR_genoEM`, refCounts, altCounts, ploidy, eps, mrep, mdiff, returnAll)
 }
