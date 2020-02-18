@@ -31,8 +31,6 @@
 #' @return a dataframe with column 1 containing sample names, column 2 containing calculated LLRs (larger means more likely given triploidy)
 #'   and column 3 containing the number of loci used to calculate the LLR
 #' @importFrom stats binom.test
-#' @importFrom Rcpp evalCpp
-#' @useDynLib tripsAndDipR, .registration=TRUE
 #' @examples
 #' # make up some data
 #' triploid_allele1 <- rbinom(60, 75, 2/3)

@@ -11,7 +11,8 @@
 #include <vector>
 
 double logChoose(const double& n, const double& k);
-double binomLH(const double& p, const int& ref, const int& alt);
+// double binomLH(const double& p, const int& ref, const int& alt);
+double binom_log_LH(const double& p, const int& ref, const int& alt);
 double logMultPMF(const std::vector <double>& k, const std::vector <double>& a);
 
 #endif

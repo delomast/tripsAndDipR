@@ -11,11 +11,16 @@ double logChoose(const double& n, const double& k){
 	return lgamma(n + 1) - lgamma(k + 1) - lgamma(n - k + 1);
 }
 
-// calculate binomial LH = need to add in binomial coefficinet?????
-// don't need it here b/c same for all, so add it separately and multiply
-// by the number of genotypes
+/*
+// calculate binomial LH
 double binomLH(const double& p, const int& ref, const int& alt){
 	return pow(p, ref) * pow(1-p, alt) * exp(logChoose(ref+alt, ref));
+}
+*/
+
+// calculate binomial log-LH
+double binom_log_LH(const double& p, const int& ref, const int& alt){
+	return (ref * log(p)) + (alt * log(1-p)) + logChoose(ref+alt, ref);
 }
 
 // pmf of multinomial distribution
