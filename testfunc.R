@@ -25,6 +25,12 @@ genosFiles <- dir(path = "S:\\Eagle Fish Genetics Lab\\Tom\\sturgeon ploidy\\Sac
 
 genosFiles <- paste0("S:\\Eagle Fish Genetics Lab\\Tom\\sturgeon ploidy\\Sacramento_parentage_genos\\",
 				 genosFiles)
+
+genosFiles <- dir(path = "../sacramento sturgeon/",
+			   pattern = "\\.genos$")
+
+genosFiles <- paste0("../sacramento sturgeon/",
+				 genosFiles)
 refCounts <- matrix(nrow = 0, ncol = 325)
 altCounts <- matrix(nrow = 0, ncol = 325)
 for(f in genosFiles){
@@ -58,7 +64,8 @@ for(f in genosFiles){
 }
 
 # save(refCounts, altCounts, file = "sturgeonData.rda")
-
+load("sturgeonData.rda")
+readRDS("sturgeonData.rda")
 
 fpTest <- funkyPloid(refCounts[1:2,], altCounts[1:2,], ploidy = c(4,6), maxRep = 10000, maxDiff = .0001)
 
@@ -102,4 +109,34 @@ sum(fpTest[,5] == 0)
 # 29
 
 write.table(fpTest, "fpTest.txt", sep = "\t", quote = FALSE, col.names = TRUE, row.names = FALSE)
+
+totC <- refCounts + altCounts
+
+hist(rowSums(totC))
+sort(rowSums(totC))
+totC <- totC[rowSums(totC) > 40000,]
+
+hist(totC[,8])
+
+apply(totC, 1, mean)
+var(totC)
+
+
+totCProp <- t(apply(totC, 1, function(x) x / sum(x)))
+totCProp <- apply(totCProp, 2, function(p) log(p / (1 - p)))
+hist(totCProp[,1])
+hist(totCProp[,2])
+hist(totCProp[,3])
+hist(totCProp[,4])
+hist(totCProp[,5])
+hist(totCProp[,6])
+hist(totCProp[,7])
+hist(totCProp[,8])
+hist(totCProp[,9])
+hist(totCProp[,10])
+
+# proportions sort of look like a curve on the log scale
+# look more like a curve of the logit scale
+# So two options to think about: multivariate normal on logit or fit a dirichlet
+
 
