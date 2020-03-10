@@ -167,6 +167,7 @@ genosFiles <- paste0("S:\\Eagle Fish Genetics Lab\\Tom\\sturgeon ploidy\\ploidy_
 
 refCounts <- matrix(nrow = 0, ncol = 325)
 altCounts <- matrix(nrow = 0, ncol = 325)
+sName_true <- c()
 for(f in genosFiles){
 	rReads <- c() # ref
 	aReads <- c() # alt
@@ -176,6 +177,7 @@ for(f in genosFiles){
 	line <- readLines(gFile, n = 1)
 	# not pulling name from .genos file
 	sName <- gsub("S:\\\\Eagle Fish Genetics Lab\\\\Tom\\\\sturgeon ploidy\\\\ploidy_genos\\\\", "", f)
+	sName_true <- c(sName_true, gsub("\\.fastq$", "", strsplit(line, ",")[[1]][1]))
 
 	line <- readLines(gFile, n = 1) # read first marker line
 	while(length(line) > 0){
@@ -202,3 +204,42 @@ for(f in genosFiles){
 load("sturgeonData2.rda")
 
 
+system.time(
+fp_456_new <- funkyPloid(refCounts, altCounts, ploidy = c(4,5,6), maxIter = 10000, maxDiff = .0001)
+)
+head(fp_456_new)
+fp_456_new[,1]
+ploid <- gsub("(.+-)|(_._.+)", "", fp_456_new[,1])
+ploid2 <- gsub("(^.+((WSTGUCD20)|(20-BLCJ))-)|(-[0-9]+$)", "", sName_true)
+all <- cbind(ploid2, ploid, sName_true, fp_456_new, stringsAsFactors = FALSE)
+plot(log(fp_456_new$LLR_4 + .0001), log(fp_456_new$LLR_6 + .0001), col = c("red", "blue", "green")[as.factor(ploid)])
+plot(fp_456_new$LLR_4, fp_456_new$LLR_6)
+
+write.table(all, "summary.txt", sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
+write.table(fp_456_new, "summary_for_Stuart.txt", sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
+
+
+sName_true
+toPlot <- c("WSTGUCD20-12N_2_10X.genos",
+"WSTGUCD20-8N_1_10X.genos",
+"WSTGUCD20-8N_5_10X.genos",
+"WSTGUCD20-UNK_C_10X.genos")
+pdf("oddInds.pdf")
+for(i in toPlot){
+
+		hist(refCounts[i,] / (refCounts[i,] + altCounts[i,]), breaks = 40, xaxt = "n", main = i)
+		axis(side=1, at=c(seq(0,1,.25), seq(0,1,1/6)), labels=round(c(seq(0,1,.25), seq(0,1,1/6)),2), cex.axis = .9
+			)
+
+}
+dev.off()
+i <- "WSTG20-BLCJ-UNK_A_10X.genos"
+
+funkyPloid(refCounts, altCounts, ploidy = c(4,5,6), maxIter = 10000, maxDiff = .0001)
+gprops <- genoProps(refCounts, altCounts, ploidy = 4, maxIter = 10000, maxDiff = .0000001)
+
+head(gprops)
+max(gprops$numIter)
+min(gprops$Loci)
+
+gprops[1:20,]

@@ -5,7 +5,7 @@
 \title{calculate LLR's for a group of samples and a given set of ploidy values}
 \usage{
 funkyPloid(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
-  maxRep = 10000, maxDiff = 0.001)
+  maxIter = 10000, maxDiff = 0.001)
 }
 \description{
 calculate LLR's for a group of samples and a given set of ploidy values

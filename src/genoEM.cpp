@@ -12,7 +12,7 @@ using namespace std;
 
 // This runs EM for a given individual and ploidy, then returns the log-likelihood at the maximum
 // with log sum exp
-//' @export
+
 // [[Rcpp::export]]
 Rcpp::NumericVector genoEM(Rcpp::NumericVector refCounts, Rcpp::NumericVector altCounts,
               int ploidy, Rcpp::NumericVector h, Rcpp::NumericVector eps, int mrep,
@@ -47,6 +47,7 @@ Rcpp::NumericVector genoEM(Rcpp::NumericVector refCounts, Rcpp::NumericVector al
 	double lastLlh = -10000; // prevent division by 0 in first rep, but at least two reps are run if mrep > 1
 	int repNum = 0;
 	while(repNum < mrep){
+		if(repNum % 100 == 0) Rcpp::checkUserInterrupt();
 		// E- step
 		llh = 0;
 		vector <double> catCounts (ploidyD + 1, 0);
