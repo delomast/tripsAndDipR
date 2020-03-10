@@ -26,12 +26,6 @@ genosFiles <- dir(path = "S:\\Eagle Fish Genetics Lab\\Tom\\sturgeon ploidy\\Sac
 genosFiles <- paste0("S:\\Eagle Fish Genetics Lab\\Tom\\sturgeon ploidy\\Sacramento_parentage_genos\\",
 				 genosFiles)
 
-# genosFiles <- dir(path = "../sacramento sturgeon/",
-# 			   pattern = "\\.genos$")
-#
-# genosFiles <- paste0("../sacramento sturgeon/",
-# 				 genosFiles)
-
 refCounts <- matrix(nrow = 0, ncol = 325)
 altCounts <- matrix(nrow = 0, ncol = 325)
 for(f in genosFiles){
@@ -159,4 +153,52 @@ str(dmModel)
 
 dmModel@estimate
 save.image("after_DM_fit.RData")
+
+
+# training / test data sets from Stuart
+
+# pull out read counts from sample sturgeon data
+
+genosFiles <- dir(path = "S:\\Eagle Fish Genetics Lab\\Tom\\sturgeon ploidy\\ploidy_genos",
+			   pattern = "\\.genos$")
+
+genosFiles <- paste0("S:\\Eagle Fish Genetics Lab\\Tom\\sturgeon ploidy\\ploidy_genos\\",
+				 genosFiles)
+
+refCounts <- matrix(nrow = 0, ncol = 325)
+altCounts <- matrix(nrow = 0, ncol = 325)
+for(f in genosFiles){
+	rReads <- c() # ref
+	aReads <- c() # alt
+	mNames <-c() # locus names
+	gFile <- file(f, "r")
+	# get sample name
+	line <- readLines(gFile, n = 1)
+	# not pulling name from .genos file
+	sName <- gsub("S:\\\\Eagle Fish Genetics Lab\\\\Tom\\\\sturgeon ploidy\\\\ploidy_genos\\\\", "", f)
+
+	line <- readLines(gFile, n = 1) # read first marker line
+	while(length(line) > 0){
+		sep <- strsplit(line, ",")[[1]]
+		mNames <- c(mNames, sep[1])
+		rReads <- c(rReads, as.numeric(gsub("^[ACTG-]=", "", sep[2])))
+		aReads <- c(aReads, as.numeric(gsub("^[ACTG-]=", "", sep[3])))
+		line <- readLines(gFile, n = 1)
+	}
+	close(gFile)
+
+	# save data, use names to make sure all in same order
+	names(rReads) <- mNames
+	names(aReads) <- mNames
+	refCounts <- rbind(refCounts, rReads)
+	altCounts <- rbind(altCounts, aReads)
+	rownames(refCounts)[nrow(refCounts)] <- sName
+	rownames(altCounts)[nrow(altCounts)] <- sName
+
+
+}
+
+# save.image("sturgeonData2.rda")
+load("sturgeonData2.rda")
+
 

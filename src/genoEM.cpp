@@ -11,6 +11,7 @@ using namespace std;
 
 
 // This runs EM for a given individual and ploidy, then returns the log-likelihood at the maximum
+// with log sum exp
 //' @export
 // [[Rcpp::export]]
 Rcpp::NumericVector genoEM(Rcpp::NumericVector refCounts, Rcpp::NumericVector altCounts,
@@ -43,24 +44,23 @@ Rcpp::NumericVector genoEM(Rcpp::NumericVector refCounts, Rcpp::NumericVector al
 
 	// EM to infer genotype category proportions and calculate likelihood
 	double llh;
-	double lastLlh = -10000; // just preventing division by 0 in first rep
+	double lastLlh = -10000; // prevent division by 0 in first rep, but at least two reps are run if mrep > 1
 	int repNum = 0;
-	for(int rep = 0; rep < mrep; rep++){
+	while(repNum < mrep){
 		// E- step
 		llh = 0;
 		vector <double> catCounts (ploidyD + 1, 0);
 		for(int i=0; i < nLoci; i++){
-			vector <double> genoProbs (ploidyD + 1, 0);
-			double rSum = 0;
+			vector <double> genoProbs (ploidyD + 1); // note that this is in log space
 			for(int j = 0, max2 = ploidyD + 1; j < max2; j++){
-				if(gFreq[j] == 0) continue; // prevent log of zero error (genoProbs initiated with 0s)
-				genoProbs[j] = exp(pAll[i][j] + log(gFreq[j]));
-				rSum += genoProbs[j];
+				if(gFreq[j] == 0) continue; // prevent log of zero error
+				genoProbs[j] =  pAll[i][j] + log(gFreq[j]);
 			}
-			llh += log(rSum);
-			for(int j = 0, max2 = ploidyD + 1; j < max2; j++) catCounts[j] += genoProbs[j] / rSum;
+			double rSum = logSumExp(genoProbs);
+			llh += rSum;
+			for(int j = 0, max2 = ploidyD + 1; j < max2; j++) catCounts[j] += exp(genoProbs[j] - rSum);
 		}
-		if ((lastLlh - llh) / lastLlh < mdiff && rep > 0) break;
+		if ((lastLlh - llh) / lastLlh < mdiff && repNum > 0) break;
 		lastLlh = llh;
 
 		// M-step
@@ -77,3 +77,6 @@ Rcpp::NumericVector genoEM(Rcpp::NumericVector refCounts, Rcpp::NumericVector al
 	}
 	return returnValues;
 }
+
+
+

@@ -11,13 +11,6 @@ double logChoose(const double& n, const double& k){
 	return lgamma(n + 1) - lgamma(k + 1) - lgamma(n - k + 1);
 }
 
-/*
-// calculate binomial LH
-double binomLH(const double& p, const int& ref, const int& alt){
-	return pow(p, ref) * pow(1-p, alt) * exp(logChoose(ref+alt, ref));
-}
-*/
-
 // calculate binomial log-LH
 double binom_log_LH(const double& p, const int& ref, const int& alt){
 	return (ref * log(p)) + (alt * log(1-p)) + logChoose(ref+alt, ref);
@@ -44,3 +37,17 @@ double logMultPMF(const vector <double>& k, const vector <double>& a){
 	return dens;
 }
 
+// log - sum - exp function
+// for a set of values x, returns
+// log(sum(e^x1 + e^x2 + ...))
+double logSumExp(const vector <double>& x){
+	if(x.size() < 1) Rcpp::stop("Internal error: vector of length 0 to logSumExp.");
+	// find max value
+	double maxV = x[0];
+	for(int i = 1, max = x.size(); i < max; i++) if (x[i] > maxV) maxV = x[i];
+
+	// calculate and return
+	double sum = 0;
+	for(int i = 0, max = x.size(); i < max; i++) sum += exp(x[i] - maxV);
+	return maxV + log(sum);
+}
