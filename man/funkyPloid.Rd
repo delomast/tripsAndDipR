@@ -7,6 +7,35 @@
 funkyPloid(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
   maxIter = 10000, maxDiff = 0.001)
 }
+\arguments{
+\item{counts}{Either a numeric matrix or a dataframe with each row corresponding to a different sample.
+There are two options for formatting the input. Either
+the columns correspond to the read counts for each locus, in a two column per locus format:
+column 1 is the read counts for locus1ReferenceAllele, column two is the read counts for locus1AlternateAllele2, locus2Reference, locus2Alternate, ...
+OR this contains read counts for the reference allele, and \code{counts_alt} contains read counts for the alternate allele
+The rownames should be the sample names.}
+
+\item{counts_alt}{Either \code{NULL} or a numeric matrix/dataframe with each row corresponding to a different sample.
+The matrix contains counts for the alternate allele, with samples and loci having the same order as in \code{counts}
+If this parameter is \code{NULL}, \code{counts} is assumed to have both the reference and alternate allele counts.}
+
+\item{ploidy}{A numeric vector containing the ploidies (as integers) to test.}
+
+\item{h}{Either \code{NULL}, or a numeric vector of h values for each locus in the same order that the loci are ordered in counts.
+These h values are as defined by Gerard et al. (2018) "Genotyping polyploids from messy sequencing data" Genetics 210:789-807.
+with h expressed as alternate / reference. These values can be estimated using the R package "updog". If \code{NULL},
+h values of 1 (unbiased) are used for all loci.}
+
+\item{eps}{Either \code{NULL}, or a numeric vector of values for the error rate per read for each locus in the same
+order that the loci are ordered in counts.
+These are expressed as proportions, so a rate of 1\% should be given as 0.01. These values can be
+estimated using the R package "updog". If \code{NULL}, error rates of .01 are assumed for all loci.}
+
+\item{maxIter}{The maximum number of iterations of the EM algorithm to run for a given sample}
+
+\item{maxDiff}{This is the maximum proportional change in log-likelihood from the previous iteration to accept
+as convergence and stop the EM algorithm.}
+}
 \description{
 calculate LLR's for a group of samples and a given set of ploidy values
 }

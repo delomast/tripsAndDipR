@@ -243,3 +243,4 @@ max(gprops$numIter)
 min(gprops$Loci)
 
 gprops[1:20,]
+
