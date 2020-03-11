@@ -153,6 +153,8 @@ str(dmModel)
 
 dmModel@estimate
 save.image("after_DM_fit.RData")
+load("after_DM_fit.RData")
+
 
 
 # training / test data sets from Stuart
@@ -244,3 +246,44 @@ min(gprops$Loci)
 
 gprops[1:20,]
 
+########################
+## looking at Monte Carlo
+########################
+
+load("after_DM_fit.RData")
+
+
+## define function to generate random dirichlet
+ranDirich <- function(alphas){
+	gammas <- sapply(alphas, function(a) rgamma(1,a))
+	return(gammas / sum(gammas))
+}
+
+nSamps <- 100
+reads <- 8000
+ploidy <- 4
+alpha <- dmModel@estimate
+eps <- rep(.01, length(alpha))
+h <- rep(1, length(alpha))
+
+
+# just making up some genotype proportions
+# based on extended HWE (no double reductions)
+totalGenoProbs <- data.frame()
+obs <- 100
+for(i in 1:length(alpha)){
+	reF <- runif(1)
+	genoprobs <- rep(NA, ploidy + 1)
+	for(p in 0:ploidy){
+		genoprobs[p+1] <- choose(ploidy, p) * (reF^p) * ((1 - reF)^(ploidy - p))
+	}
+	# posterior with a uniform prior
+	genoprobs <- as.vector(rmultinom(1, obs, genoprobs)) + 1
+	totalGenoProbs <- rbind(totalGenoProbs, genoprobs)
+}
+
+randSamples <- rPloidySamples(10, 20000, 4, alpha, eps = NULL, h = NULL, totalGenoProbs - 1,
+				genotypePropsAreKnown = FALSE)
+str(randSamples)
+
+mcError <- funkyPloid(randSamples$counts, randSamples$counts_alt, ploidy = c(4,5,6), maxIter = 10000, maxDiff = .0001)

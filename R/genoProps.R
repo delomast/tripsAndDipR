@@ -47,7 +47,7 @@ genoProps <- function(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
 	if(any(rownames(counts) != rownames(counts_alt))) warning("counts and counts_alt have different rownames. ",
 		"The results will assume that they are in the same order and will use the rownames for counts.")
 	if(length(ploidy) != 1) stop("Only one ploidy can be specified for this function.")
-	if(!isTRUE(all.equal(0, ploidy %% 1))) stop("Ploidies must be an integer")
+	if(!isTRUE(all.equal(0, ploidy %% 1))) stop("ploidy must be an integer")
 
 	# fit model
 	results <- matrix(NA, nrow = nrow(counts), ncol = ploidy + 3)
