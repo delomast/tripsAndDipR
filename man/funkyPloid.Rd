@@ -8,14 +8,14 @@ funkyPloid(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
   maxIter = 10000, maxDiff = 0.001)
 }
 \arguments{
-\item{counts}{Either a numeric matrix or a dataframe with each row corresponding to a different sample.
+\item{counts}{A numeric matrix with each row corresponding to a different sample.
 There are two options for formatting the input. Either
 the columns correspond to the read counts for each locus, in a two column per locus format:
 column 1 is the read counts for locus1ReferenceAllele, column two is the read counts for locus1AlternateAllele2, locus2Reference, locus2Alternate, ...
 OR this contains read counts for the reference allele, and \code{counts_alt} contains read counts for the alternate allele
 The rownames should be the sample names.}
 
-\item{counts_alt}{Either \code{NULL} or a numeric matrix/dataframe with each row corresponding to a different sample.
+\item{counts_alt}{Either \code{NULL} or a numeric matrix with each row corresponding to a different sample.
 The matrix contains counts for the alternate allele, with samples and loci having the same order as in \code{counts}
 If this parameter is \code{NULL}, \code{counts} is assumed to have both the reference and alternate allele counts.}
 

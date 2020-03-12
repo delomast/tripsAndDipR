@@ -238,7 +238,15 @@ dev.off()
 i <- "WSTG20-BLCJ-UNK_A_10X.genos"
 
 funkyPloid(refCounts, altCounts, ploidy = c(4,5,6), maxIter = 10000, maxDiff = .0001)
-gprops <- genoProps(refCounts, altCounts, ploidy = 4, maxIter = 10000, maxDiff = .0000001)
+gprops4 <- genoProps(refCounts, altCounts, ploidy = 4, maxIter = 10000, maxDiff = .0000001)
+gprops6 <- genoProps(refCounts, altCounts, ploidy = 6, maxIter = 10000, maxDiff = .0000001)
+
+indsLowMinLLR <- fp_456_new[grepl("10X", fp_456_new$Ind) & apply(fp_456_new[,3:5], 1, median) < 2000,1]
+
+apply(gprops4[grepl("8N", gprops4$Ind),5:9],2,mean)
+
+gprops4[gprops4$Ind %in% indsLowMinLLR,5:9]
+
 
 head(gprops)
 max(gprops$numIter)
@@ -253,19 +261,8 @@ gprops[1:20,]
 load("after_DM_fit.RData")
 
 
-## define function to generate random dirichlet
-ranDirich <- function(alphas){
-	gammas <- sapply(alphas, function(a) rgamma(1,a))
-	return(gammas / sum(gammas))
-}
-
-nSamps <- 100
-reads <- 8000
 ploidy <- 4
 alpha <- dmModel@estimate
-eps <- rep(.01, length(alpha))
-h <- rep(1, length(alpha))
-
 
 # just making up some genotype proportions
 # based on extended HWE (no double reductions)
@@ -278,12 +275,73 @@ for(i in 1:length(alpha)){
 		genoprobs[p+1] <- choose(ploidy, p) * (reF^p) * ((1 - reF)^(ploidy - p))
 	}
 	# posterior with a uniform prior
-	genoprobs <- as.vector(rmultinom(1, obs, genoprobs)) + 1
+	genoprobs <- as.vector(rmultinom(1, obs, genoprobs))
 	totalGenoProbs <- rbind(totalGenoProbs, genoprobs)
 }
 
-randSamples <- rPloidySamples(10, 20000, 4, alpha, eps = NULL, h = NULL, totalGenoProbs - 1,
+randSamples <- rPloidySamples(1000, 20000, 4, alpha, eps = NULL, h = NULL, totalGenoProbs,
 				genotypePropsAreKnown = FALSE)
 str(randSamples)
 
 mcError <- funkyPloid(randSamples$counts, randSamples$counts_alt, ploidy = c(4,5,6), maxIter = 10000, maxDiff = .0001)
+
+table(mcError[,3])
+
+
+
+
+##########################
+
+# testing different input formats
+
+genosFiles <- dir(path = "S:\\Eagle Fish Genetics Lab\\Tom\\sturgeon ploidy\\Sacramento_parentage_genos",
+			   pattern = "\\.genos$")
+
+genosFiles <- paste0("S:\\Eagle Fish Genetics Lab\\Tom\\sturgeon ploidy\\Sacramento_parentage_genos\\",
+				 genosFiles)
+
+refCounts <- matrix(nrow = 0, ncol = 325)
+altCounts <- matrix(nrow = 0, ncol = 325)
+for(f in genosFiles){
+	rReads <- c() # ref
+	aReads <- c() # alt
+	mNames <-c() # locus names
+	gFile <- file(f, "r")
+	# get sample name
+	line <- readLines(gFile, n = 1)
+	sName <- gsub("\\.fastq$", "", strsplit(line, ",")[[1]][1])
+
+	line <- readLines(gFile, n = 1) # read first marker line
+	while(length(line) > 0){
+		sep <- strsplit(line, ",")[[1]]
+		mNames <- c(mNames, sep[1])
+		rReads <- c(rReads, as.numeric(gsub("^[ACTG-]=", "", sep[2])))
+		aReads <- c(aReads, as.numeric(gsub("^[ACTG-]=", "", sep[3])))
+		line <- readLines(gFile, n = 1)
+	}
+	close(gFile)
+
+	# save data, use names to make sure all in same order
+	names(rReads) <- mNames
+	names(aReads) <- mNames
+	refCounts <- rbind(refCounts, rReads)
+	altCounts <- rbind(altCounts, aReads)
+	rownames(refCounts)[nrow(refCounts)] <- sName
+	rownames(altCounts)[nrow(altCounts)] <- sName
+
+
+}
+
+fp_sep <- funkyPloid(refCounts, altCounts, ploidy = c(4,5,6), maxIter = 10000, maxDiff = .000001)
+
+twocol <- data.frame()
+for(i in 1:ncol(refCounts)){
+	twocol <- rbind(twocol, refCounts[,i], altCounts[,i])
+}
+twocol <- as.data.frame(t(twocol))
+
+fp_together <- funkyPloid(twocol, ploidy = c(4,5,6), maxIter = 10000, maxDiff = .000001)
+
+identical(fp_sep[,2:ncol(fp_sep)], fp_together[,2:ncol(fp_together)])
+all.equal(fp_sep, fp_together)
+
