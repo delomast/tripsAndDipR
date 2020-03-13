@@ -5,3 +5,7 @@ genoEM <- function(refCounts, altCounts, ploidy, h, eps, mrep, mdiff, returnAll)
     .Call(`_tripsAndDipR_genoEM`, refCounts, altCounts, ploidy, h, eps, mrep, mdiff, returnAll)
 }
 
+genoEM_noise <- function(refCounts, altCounts, ploidy, h, eps, mrep, mdiff, returnAll) {
+    .Call(`_tripsAndDipR_genoEM_noise`, refCounts, altCounts, ploidy, h, eps, mrep, mdiff, returnAll)
+}
+

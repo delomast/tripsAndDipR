@@ -345,3 +345,43 @@ fp_together <- funkyPloid(twocol, ploidy = c(4,5,6), maxIter = 10000, maxDiff = 
 identical(fp_sep[,2:ncol(fp_sep)], fp_together[,2:ncol(fp_together)])
 all.equal(fp_sep, fp_together)
 
+# looking at known ploidy
+ref8N <- refCounts[grepl("8N", rownames(refCounts)),]
+alt8N <- altCounts[grepl("8N", rownames(altCounts)),]
+
+fpInd <- funkyPloid(ref8N, alt8N, ploidy = c(4,6,8), maxIter = 10000, maxDiff = .000001)
+inds8n <- fpInd[fpInd$LLR_6 > 0,1]
+ref8N <- refCounts[inds8n,]
+alt8N <- altCounts[inds8n,]
+fpInd <- funkyPloid(ref8N, alt8N, ploidy = c(4,6,8), maxIter = 10000, maxDiff = .000001)
+head(fpInd)
+gp4Ind <- genoProps(ref8N, alt8N, ploidy = 4, maxIter = 10000, maxDiff = .000001)
+gp8Ind <- genoProps(ref8N, alt8N, ploidy = 8, maxIter = 10000, maxDiff = .000001)
+head(gp4Ind)
+head(gp8Ind)
+
+i <- "WSTG20-BLCJ-8N_1_10X.genos"
+hist(refCounts[i,] / (refCounts[i,] + altCounts[i,]), breaks = 40, xaxt = "n", main = i)
+axis(side=1, at=c(seq(0,1,.25), seq(0,1,1/8)), labels=round(c(seq(0,1,.25), seq(0,1,1/8)),2), cex.axis = .9
+	)
+
+fpLoc <- funkyPloid(t(ref8N), t(alt8N), ploidy = c(4,8), maxIter = 10000, maxDiff = .000001)
+round(fpLoc[,3:5], 2)
+head(fpLoc)
+gp4Loc <- genoProps(t(ref8N), t(alt8N), ploidy = 4, maxIter = 10000, maxDiff = .000001)
+gp8Loc <- genoProps(t(ref8N), t(alt8N), ploidy = 8, maxIter = 10000, maxDiff = .000001)
+head(gp4Loc)
+head(gp8Loc)
+
+i <- "Atr_10322-43"
+hist(t(ref8N)[i,] / (t(ref8N)[i,] +
+t(alt8N)[i,])
+)
+
+fpInd <- funkyPloid(ref8N, alt8N, ploidy = c(4,6,8), maxIter = 10000, maxDiff = .000001, noise = TRUE)
+gp4Ind <- genoProps(ref8N, alt8N, ploidy = 4, maxIter = 10000, maxDiff = .000001, noise = TRUE)
+gp8Ind <- genoProps(ref8N, alt8N, ploidy = 8, maxIter = 10000, maxDiff = .000001, noise = TRUE)
+
+fpInd2 <- funkyPloid(ref8N, alt8N, ploidy = c(4,5,6), maxIter = 10000, maxDiff = .000001, noise = TRUE)
+
+
