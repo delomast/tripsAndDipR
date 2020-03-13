@@ -27,8 +27,7 @@
 #'
 #'
 #'
-#' @importFrom Rcpp evalCpp
-#' @useDynLib tripsAndDipR, .registration=TRUE
+#' @export
 
 genoProps <- function(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
 				   maxIter = 10000, maxDiff = .001){
