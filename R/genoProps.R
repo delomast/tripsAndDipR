@@ -70,7 +70,6 @@ genoProps <- function(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
 				mrep = maxIter, mdiff = maxDiff, returnAll = TRUE)
 		}
 	}
-	results <-
 	output <- data.frame(Ind = rep(NA, nrow(counts)),
 						Loci = mLoci,
 					 	numIter = results[,ncol(results)],
