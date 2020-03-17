@@ -9,3 +9,7 @@ genoEM_noise <- function(refCounts, altCounts, ploidy, h, eps, mrep, mdiff, retu
     .Call(`_tripsAndDipR_genoEM_noise`, refCounts, altCounts, ploidy, h, eps, mrep, mdiff, returnAll)
 }
 
+llh_calc_BB_noise <- function(refCounts, altCounts, tau, mixWeights, ploidy, h, eps) {
+    .Call(`_tripsAndDipR_llh_calc_BB_noise`, refCounts, altCounts, tau, mixWeights, ploidy, h, eps)
+}
+

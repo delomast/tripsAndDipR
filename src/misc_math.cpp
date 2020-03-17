@@ -51,3 +51,23 @@ double logSumExp(const vector <double>& x){
 	for(int i = 0, max = x.size(); i < max; i++) sum += exp(x[i] - maxV);
 	return maxV + log(sum);
 }
+
+// pmf of Dirichlet-multinomial distribution
+// @param k a vector of the number of observations in each category
+// @param a a vector of the parameters (alpha) describing the Dirichlet
+double logDirichMultPMF(const vector <double>& k, const vector <double>& a){
+	if (k.size() != a.size()) Rcpp::stop("internal error: k not equal to a in logdirichMultPMF");
+	int numAlpha = a.size();
+	double n = 0;
+	for(int i = 0; i < numAlpha; i++) n += k[i];
+	double sumAlpha = 0;
+	for(int i = 0; i < numAlpha; i++) sumAlpha += a[i];
+
+	//start density calculation
+	double dens = lgamma(n + 1) + lgamma(sumAlpha) - lgamma(n + sumAlpha);
+	for(int i = 0; i < numAlpha; i++){
+		dens += lgamma(k[i] + a[i]) - lgamma(k[i] + 1) - lgamma(a[i]);
+	}
+	return dens;
+}
+

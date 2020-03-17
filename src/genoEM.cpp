@@ -126,8 +126,8 @@ Rcpp::NumericVector genoEM_noise(Rcpp::NumericVector refCounts, Rcpp::NumericVec
 	 * This is a beta-binomial with alpha = beta = 1
 	 * pmf simplifies to 1 / (n+1)
 	 */
-	// simplified log(1 / (refCounts[i] + altCounts[i]))
-	for(int i = 0; i < nLoci; i++) pAll[i].push_back(-log(refCounts[i] + altCounts[i]));
+	// simplified log(1 / (1 + refCounts[i] + altCounts[i]))
+	for(int i = 0; i < nLoci; i++) pAll[i].push_back(-log(1 + refCounts[i] + altCounts[i]));
 
 
 	// EM to infer genotype category proportions and calculate likelihood

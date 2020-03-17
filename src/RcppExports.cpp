@@ -41,10 +41,28 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// llh_calc_BB_noise
+Rcpp::NumericVector llh_calc_BB_noise(Rcpp::NumericVector refCounts, Rcpp::NumericVector altCounts, Rcpp::NumericVector tau, Rcpp::NumericVector mixWeights, int ploidy, Rcpp::NumericVector h, Rcpp::NumericVector eps);
+RcppExport SEXP _tripsAndDipR_llh_calc_BB_noise(SEXP refCountsSEXP, SEXP altCountsSEXP, SEXP tauSEXP, SEXP mixWeightsSEXP, SEXP ploidySEXP, SEXP hSEXP, SEXP epsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type refCounts(refCountsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type altCounts(altCountsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type tau(tauSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type mixWeights(mixWeightsSEXP);
+    Rcpp::traits::input_parameter< int >::type ploidy(ploidySEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type h(hSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type eps(epsSEXP);
+    rcpp_result_gen = Rcpp::wrap(llh_calc_BB_noise(refCounts, altCounts, tau, mixWeights, ploidy, h, eps));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_tripsAndDipR_genoEM", (DL_FUNC) &_tripsAndDipR_genoEM, 8},
     {"_tripsAndDipR_genoEM_noise", (DL_FUNC) &_tripsAndDipR_genoEM_noise, 8},
+    {"_tripsAndDipR_llh_calc_BB_noise", (DL_FUNC) &_tripsAndDipR_llh_calc_BB_noise, 7},
     {NULL, NULL, 0}
 };
 

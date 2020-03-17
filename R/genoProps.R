@@ -73,7 +73,7 @@ genoProps <- function(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
 	output <- data.frame(Ind = rep(NA, nrow(counts)),
 						Loci = mLoci,
 					 	numIter = results[,ncol(results)],
-						results[,1:(ncol(results)-1)], stringsAsFactors = FALSE)
+						results[,1:(ncol(results)-1), drop = FALSE], stringsAsFactors = FALSE)
 	if(!is.null(rownames(counts))){
 		output$Ind <- rownames(counts)
 	} else {

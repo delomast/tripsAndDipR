@@ -268,7 +268,8 @@ alpha <- dmModel@estimate
 # based on extended HWE (no double reductions)
 totalGenoProbs <- data.frame()
 obs <- 100
-for(i in 1:length(alpha)){
+# for(i in 1:length(alpha)){
+for(i in 1:100){
 	reF <- runif(1)
 	genoprobs <- rep(NA, ploidy + 1)
 	for(p in 0:ploidy){
@@ -345,6 +346,75 @@ fp_together <- funkyPloid(twocol, ploidy = c(4,5,6), maxIter = 10000, maxDiff = 
 identical(fp_sep[,2:ncol(fp_sep)], fp_together[,2:ncol(fp_together)])
 all.equal(fp_sep, fp_together)
 
+
+i <- rownames(refCounts)[grepl("1LF12_OE5Ex2E4C", rownames(refCounts))]
+hist(refCounts[i,] / (refCounts[i,] + altCounts[i,]), breaks = 40, xaxt = "n", main = i)
+axis(side=1, at=c(seq(0,1,.25), seq(0,1,1/6)), labels=round(c(seq(0,1,.25), seq(0,1,1/6)),2), cex.axis = .9
+	)
+
+plot(refCounts[i,], altCounts[i,])
+sum(refCounts[i,], altCounts[i,])
+
+genoProps(refCounts[i,,drop = FALSE], altCounts[i,,drop = FALSE], ploidy = 4, maxIter = 10000, maxDiff = .000001)
+genoProps(refCounts[i,,drop = FALSE], altCounts[i,,drop = FALSE], ploidy = 6, maxIter = 10000, maxDiff = .000001)
+sum(log(1 / (1+r+a)))
+
+fourSixUnif <- cbind(
+	genoProps(refCounts, altCounts, ploidy = 4, maxIter = 10000, maxDiff = .000001)$LLH,
+genoProps(refCounts, altCounts, ploidy = 6, maxIter = 10000, maxDiff = .000001)$LLH,
+	apply(refCounts + altCounts, 1, function(x){
+		sum(-log(1+x))
+	})
+
+)
+head(fourSixUnif)
+fourSixUnif <- t(apply(fourSixUnif, 1, function(x) max(x) - x))
+
+
+toPlot <- c("3HF6_OE5ExO610",
+"3HF2_OE5ExO610",
+"1HF17_6F6BxO610",
+"3HF5_OE5ExO610",
+"1LF12_OE5Ex2E4C",
+"3HF8_OE5ExO610",
+"1LF15_OE5Ex2E4C",
+"1LF11_6F6BxO610",
+"1HF23_OE5Ex2E4C",
+"3LF10_OE5ExO610",
+"1HF14_6F6BxO610",
+"1LF47_6F6BxO610",
+"3LF9_OE5ExO610",
+"1HF45_OE5Ex2E4C",
+"1HF41_6F6BxO610",
+"1HF48_6158x2E4C",
+"1HF19_OE5Ex2E4C"
+)
+
+pdf("oddInds.pdf")
+for(p in toPlot){
+	i <- rownames(refCounts)[grepl(p, rownames(refCounts))]
+	r <- refCounts[i,]
+	a <- altCounts[i,]
+	# b <- r > 5 & a > 5
+	# r <- r[b]
+	# a <- a[b]
+	hist(r / (r + a), breaks = 40, xaxt = "n", main = i)
+	axis(side=1, at=c(seq(0,1,.25), seq(0,1,1/6)), labels=round(c(seq(0,1,.25), seq(0,1,1/6)),2), cex.axis = .9)
+}
+dev.off()
+
+pdf("goodPlots.pdf")
+for(p in c("1HF36_6158x2E4C", "DAM-2808")){
+	i <- rownames(refCounts)[grepl(p, rownames(refCounts))]
+	r <- refCounts[i,]
+	a <- altCounts[i,]
+	hist(r / (r + a), breaks = 40, xaxt = "n", main = i)
+	axis(side=1, at=c(seq(0,1,.25), seq(0,1,1/6)), labels=round(c(seq(0,1,.25), seq(0,1,1/6)),2), cex.axis = .9)
+}
+dev.off()
+
+
+
 # looking at known ploidy
 ref8N <- refCounts[grepl("8N", rownames(refCounts)),]
 alt8N <- altCounts[grepl("8N", rownames(altCounts)),]
@@ -383,5 +453,94 @@ gp4Ind <- genoProps(ref8N, alt8N, ploidy = 4, maxIter = 10000, maxDiff = .000001
 gp8Ind <- genoProps(ref8N, alt8N, ploidy = 8, maxIter = 10000, maxDiff = .000001, noise = TRUE)
 
 fpInd2 <- funkyPloid(ref8N, alt8N, ploidy = c(4,5,6), maxIter = 10000, maxDiff = .000001, noise = TRUE)
+
+
+
+multTau <- function(pars, r, a, ploidy){
+	b <- r + a > 0
+	ncat <- ploidy + 2
+	tau <- pars[1:ncat]
+	mixW <- pars[(ncat + 1):(2 * ncat)]
+	mixW <- mixW / sum(mixW)
+	return(
+		llh_calc_BB_noise(r[b], a[b], tau, mixW,
+              ploidy, rep(1, sum(b)), rep(.01, sum(b)))
+	)
+}
+
+oneTau <- function(pars, r, a, ploidy){
+	if(any(pars <= 0 | pars >= 1)) return (Inf)
+	b <- r + a > 0
+	tau <- pars[1]
+	mixW <- pars[2:length(pars)]
+	mixW <- mixW / sum(mixW)
+	return(
+		-llh_calc_BB_noise(r[b], a[b], rep(tau, length(mixW)), mixW,
+              ploidy, rep(1, sum(b)), rep(.01, sum(b)))
+	)
+}
+
+pToTest <- 4
+c("1HF36_6158x2E4C", "DAM-2808")
+p <- "DAM-2808"
+p <- "1HF36_6158x2E4C"
+i <- rownames(refCounts)[grepl(p, rownames(refCounts))]
+
+r1 <- optim(rep(.3, pToTest + 3), oneTau, method = "BFGS", r = refCounts[i,], a = altCounts[i,], ploidy = pToTest)
+r2 <- optim(rep(.3, pToTest + 3), oneTau, method = "Nelder-Mead", r = refCounts[i,], a = altCounts[i,], ploidy = pToTest)
+
+optim(c(.99, .1,.1,.5,.8,.1,.01), oneTau, method = "BFGS", r = refCounts[i,], a = altCounts[i,], ploidy = pToTest)
+
+mixW <- r1$par[2:length(r1$par)]
+mixW <- r2$par[2:length(r2$par)]
+mixW / sum(mixW)
+oneTau(r1$par, r = refCounts[i,], a = altCounts[i,], ploidy = pToTest)
+oneTau(r2$par, r = refCounts[i,], a = altCounts[i,], ploidy = pToTest)
+oneTau(c(.9, 1/15,1/15,1/15,2/15,.3333,.01), r = refCounts[i,], a = altCounts[i,], ploidy = pToTest)
+
+oneTau(c(.5, rep(10^-10,pToTest+1), .999999999999), r = refCounts[i,], a = altCounts[i,], ploidy = pToTest)
+
+totalGenoProbs2 <- totalGenoProbs
+totalGenoProbs2[,2] <- totalGenoProbs2[,2] + 1000
+mcCounts <- rPloidySamples(2, 100000, 4, rep(10,100), genotypeCounts = totalGenoProbs)
+mcCounts <- rPloidySamples(2, 100000, 4, rep(10,100), genotypeCounts = totalGenoProbs2)
+
+r1 <- optim(rep(.3, pToTest + 3), oneTau, method = "BFGS", r = mcCounts$counts[1,], a = mcCounts$counts_alt[1,], ploidy = pToTest)
+r2 <- optim(rep(.3, pToTest + 3), oneTau, method = "Nelder-Mead", r = mcCounts$counts[1,], a = mcCounts$counts_alt[1,], ploidy = pToTest)
+oneTau(c(.02, rep(.1, pToTest+1), .0001), r = mcCounts$counts[1,], a = mcCounts$counts_alt[1,], ploidy = pToTest)
+
+hist(mcCounts[[1]][1,] / (mcCounts[[2]][1,] + mcCounts[[1]][1,]), breaks = 30)
+
+
+
+
+oneTau(rep(.5, pToTest + 3), r = refCounts[i,], a = altCounts[i,], ploidy = pToTest)
+e <-7
+unique(replicate(1000, oneTau(rep(.5, pToTest + 3), r = refCounts[i,1:e], a = altCounts[i,1:e], ploidy = pToTest)))
+
+unique(replicate(1000, oneTau(rep(.5, pToTest + 3), r = refCounts[i,7], a = altCounts[i,7], ploidy = pToTest)))
+
+
+oneTau(rep(.5, pToTest + 3), r = refCounts[i,7], a = altCounts[i,7], ploidy = pToTest)
+
+
+
+
+
+for(j in which(refCounts[i,] + altCounts[i,] > 0)){
+
+	print(
+		oneTau(rep(.5, pToTest + 3), r = refCounts[i,j], a = altCounts[i,j], ploidy = pToTest)
+	)
+
+}
+
+refCounts[i,7]
+altCounts[i,7]
+
+oneTau(rep(.5, pToTest + 3), r = 1636, a = 487, ploidy = pToTest)
+
+llh_calc_BB_noise(1636, 487, rep(tau, 6), rep(1/6, 6), 4, 1, .01)
+
 
 
