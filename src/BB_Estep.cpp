@@ -17,7 +17,7 @@ Rcpp::NumericVector BB_Estep(Rcpp::NumericVector refCounts, Rcpp::NumericVector 
 	if (refCounts.length() != altCounts.length()) Rcpp::stop("ref and alt counts must have equal lengths.");
 
 	double ploidyD = ploidy;
-	unsigned int noisePos = ploidy + 1;
+	int noisePos = ploidy + 1;
 
 	if (noise && mixWeights.length() != (noisePos + 1)) Rcpp::stop("mixWeights is wrong size.");
 	if (!noise && mixWeights.length() != noisePos) Rcpp::stop("mixWeights is wrong size.");

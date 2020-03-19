@@ -40,7 +40,7 @@ Rcpp::NumericVector grad_BB_BBnoise(Rcpp::NumericVector tau, Rcpp::NumericVector
 
 	bool noise = mixWeights.length() > tau.length();
 
-	Rcpp::NumericVector gradient (tau.length(), 0);
+	vector <double> gradient (tau.length(), 0);
 
 	// for each locus
 	for(int i = 0; i < nLoci; i++){
@@ -82,6 +82,9 @@ Rcpp::NumericVector grad_BB_BBnoise(Rcpp::NumericVector tau, Rcpp::NumericVector
 		}
 	}
 
-	return gradient;
-}
+	// return results
+	Rcpp::NumericVector out;
+	for (int i = 0, m = gradient.size(); i < m; i++) out.push_back(gradient[i]);
 
+	return out;
+}
