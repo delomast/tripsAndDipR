@@ -71,3 +71,16 @@ double logDirichMultPMF(const vector <double>& k, const vector <double>& a){
 	return dens;
 }
 
+// calculate log of the beta function
+double logBeta(const double& a, const double& b) {
+	return lgamma(a) + lgamma(b) - lgamma(a+b);
+}
+
+// pmf of beta-binomial distribution
+// n is total number of trials
+// k is number of successes
+// a is alpha
+// b is beta
+double logBetaBinomPMF(const double& n, const double& k, const double& a, const double& b){
+	return logChoose(n, k) + logBeta(k + a, n - k + b) - logBeta(a, b);
+}

@@ -24,13 +24,18 @@
 #' @param maxIter The maximum number of iterations of the EM algorithm to run for a given sample
 #' @param maxDiff This is the maximum proportional change in log-likelihood from the previous iteration to accept
 #'   as convergence and stop the EM algorithm.
+#' @param model the model to fit: Bin - mixture of binomials, BB_noise - mixture of
+#'   beta-binomials WITH uniform noise, BB - mixture of beta-binomials WITHOUT uniform noise
 #'
 #'
 #'
 #' @export
 
 genoProps <- function(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
-				   maxIter = 10000, maxDiff = .001){
+				   maxIter = 10000, maxDiff = .001, model = c("Bin", "BB_noise", "BB")){
+
+	model <- match.arg(model)
+
 	if(!is.matrix(counts)){
 		warning("Coercing counts to a matrix.")
 		counts <- as.matrix(counts)
@@ -59,15 +64,40 @@ genoProps <- function(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
 	if(!isTRUE(all.equal(0, ploidy %% 1))) stop("ploidy must be an integer")
 
 	# fit model
-	results <- matrix(NA, nrow = nrow(counts), ncol = ploidy + 3)
+	if(model == "Bin") {
+		results <- matrix(NA, nrow = nrow(counts), ncol = ploidy + 3)
+	} else if(model == "BB_noise") {
+		results <- matrix(NA, nrow = nrow(counts), ncol = (ploidy+2)*2 + 1)
+	} else if(model == "BB") {
+		results <- matrix(NA, nrow = nrow(counts), ncol = (ploidy+1)*2 + 2)
+	}
+
 	mLoci <- rep(NA, nrow(counts))
 	for(i in 1:nrow(counts)){
 		countBool <- counts[i,] + counts_alt[i,] > 0 # only use loci with reads
 		mLoci[i] <- sum(countBool)
 		if(mLoci[i] > 0){
-			results[i,] <- genoEM(refCounts = counts[i,countBool], altCounts = counts_alt[i,countBool],
-				ploidy = ploidy, h = h[countBool], eps = eps[countBool],
-				mrep = maxIter, mdiff = maxDiff, returnAll = TRUE)
+			if(model == "Bin"){
+				results[i,] <- genoEM(refCounts = counts[i,countBool], altCounts = counts_alt[i,countBool],
+					ploidy = ploidy, h = h[countBool], eps = eps[countBool],
+					mrep = maxIter, mdiff = maxDiff, returnAll = TRUE)
+			} else {
+				if (model == "BB_noise") {
+					noise <- TRUE
+				} else if (model == "BB"){
+					noise <- FALSE
+				}
+
+				tempRes <- BBpolyEM(refCounts = counts[i,countBool], altCounts = counts_alt[i,countBool],
+							ploidy = ploidy, h = h[countBool], eps = eps[countBool],
+							noise = noise, mdiff = maxDiff, maxrep = maxIter)
+				if(tempRes$optimRes$convergence == 1) warning("M step failed to converge on last iteration for ",
+													 rownames(counts)[i])
+				if(!tempRes$optimRes$convergence %in% c(0,1)) warning("warning from optim during last step for ",
+					rownames(counts)[i], ": ", tempRes$OptimRes$message)
+
+				results[i,] <- c(tempRes$llh, tempRes$mixProps, tempRes$tau, tempRes$reps)
+			}
 		}
 	}
 	output <- data.frame(Ind = rep(NA, nrow(counts)),
@@ -80,7 +110,15 @@ genoProps <- function(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
 		output$Ind <- paste0("Row_", 1:nrow(counts))
 	}
 	colnames(output)[4] <- "LLH"
-	colnames(output)[5:ncol(output)] <- paste0("ref_", 0:ploidy)
+	colnames(output)[5:(5+ploidy)] <- paste0("ref_", 0:ploidy)
+	if(model %in% c("BB_noise", "BB")){
+		if(noise){
+			colnames(output)[(5+ploidy+1)] <- "noise"
+			colnames(output)[(5+ploidy+2):ncol(output)] <- paste0("tau_", 0:ploidy)
+		} else {
+			colnames(output)[(5+ploidy+1):ncol(output)] <- paste0("tau_", 0:ploidy)
+		}
+	}
 
 	return(output)
 }

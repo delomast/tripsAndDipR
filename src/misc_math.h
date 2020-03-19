@@ -15,5 +15,7 @@ double binom_log_LH(const double& p, const int& ref, const int& alt);
 double logMultPMF(const std::vector <double>& k, const std::vector <double>& a);
 double logSumExp(const std::vector <double>& x);
 double logDirichMultPMF(const std::vector <double>& k, const std::vector <double>& a);
+double logBeta(const double& a, const double& b);
+double logBetaBinomPMF(const double& n, const double& k, const double& a, const double& b);
 
 #endif

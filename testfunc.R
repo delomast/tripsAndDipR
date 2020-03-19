@@ -261,7 +261,7 @@ gprops[1:20,]
 load("after_DM_fit.RData")
 
 
-ploidy <- 4
+ploidy <- 6
 alpha <- dmModel@estimate
 
 # just making up some genotype proportions
@@ -457,13 +457,19 @@ fpInd2 <- funkyPloid(ref8N, alt8N, ploidy = c(4,5,6), maxIter = 10000, maxDiff =
 
 
 multTau <- function(pars, r, a, ploidy){
+	if(any(pars <= 0 | pars >= 1)) return (Inf)
 	b <- r + a > 0
+	# ncat <- ploidy + 1
 	ncat <- ploidy + 2
 	tau <- pars[1:ncat]
 	mixW <- pars[(ncat + 1):(2 * ncat)]
 	mixW <- mixW / sum(mixW)
+# 	return(
+# 		-llh_calc_BB(r[b], a[b], tau, mixW,
+#               ploidy, rep(1, sum(b)), rep(.01, sum(b)))
+# 	)
 	return(
-		llh_calc_BB_noise(r[b], a[b], tau, mixW,
+		-llh_calc_BB_noise(r[b], a[b], tau, mixW,
               ploidy, rep(1, sum(b)), rep(.01, sum(b)))
 	)
 }
@@ -475,72 +481,135 @@ oneTau <- function(pars, r, a, ploidy){
 	mixW <- pars[2:length(pars)]
 	mixW <- mixW / sum(mixW)
 	return(
-		-llh_calc_BB_noise(r[b], a[b], rep(tau, length(mixW)), mixW,
+		-llh_calc_BB(r[b], a[b], rep(tau, length(mixW)), mixW,
               ploidy, rep(1, sum(b)), rep(.01, sum(b)))
 	)
+# 	return(
+# 		-llh_calc_BB_noise(r[b], a[b], rep(tau, length(mixW)), mixW,
+#               ploidy, rep(1, sum(b)), rep(.01, sum(b)))
+# 	)
 }
 
-pToTest <- 4
+pToTest <- 6
 c("1HF36_6158x2E4C", "DAM-2808")
 p <- "DAM-2808"
 p <- "1HF36_6158x2E4C"
 i <- rownames(refCounts)[grepl(p, rownames(refCounts))]
 
-r1 <- optim(rep(.3, pToTest + 3), oneTau, method = "BFGS", r = refCounts[i,], a = altCounts[i,], ploidy = pToTest)
-r2 <- optim(rep(.3, pToTest + 3), oneTau, method = "Nelder-Mead", r = refCounts[i,], a = altCounts[i,], ploidy = pToTest)
+# r2 <- optim(rep(.01, pToTest + 2), oneTau, method = "Nelder-Mead", r = refCounts[i,], a = altCounts[i,], ploidy = pToTest,
+# 		  control = list(maxit=10000))
 
-optim(c(.99, .1,.1,.5,.8,.1,.01), oneTau, method = "BFGS", r = refCounts[i,], a = altCounts[i,], ploidy = pToTest)
+r2 <- optim(rep(.01, (pToTest+2)*2), multTau, method = "Nelder-Mead", r = refCounts[i,], a = altCounts[i,], ploidy = pToTest,
+		  control = list(maxit=10000))
 
-mixW <- r1$par[2:length(r1$par)]
-mixW <- r2$par[2:length(r2$par)]
+mixW <- r2$par[(pToTest+1):length(r2$par)]
 mixW / sum(mixW)
-oneTau(r1$par, r = refCounts[i,], a = altCounts[i,], ploidy = pToTest)
-oneTau(r2$par, r = refCounts[i,], a = altCounts[i,], ploidy = pToTest)
-oneTau(c(.9, 1/15,1/15,1/15,2/15,.3333,.01), r = refCounts[i,], a = altCounts[i,], ploidy = pToTest)
-
-oneTau(c(.5, rep(10^-10,pToTest+1), .999999999999), r = refCounts[i,], a = altCounts[i,], ploidy = pToTest)
-
-totalGenoProbs2 <- totalGenoProbs
-totalGenoProbs2[,2] <- totalGenoProbs2[,2] + 1000
-mcCounts <- rPloidySamples(2, 100000, 4, rep(10,100), genotypeCounts = totalGenoProbs)
-mcCounts <- rPloidySamples(2, 100000, 4, rep(10,100), genotypeCounts = totalGenoProbs2)
-
-r1 <- optim(rep(.3, pToTest + 3), oneTau, method = "BFGS", r = mcCounts$counts[1,], a = mcCounts$counts_alt[1,], ploidy = pToTest)
-r2 <- optim(rep(.3, pToTest + 3), oneTau, method = "Nelder-Mead", r = mcCounts$counts[1,], a = mcCounts$counts_alt[1,], ploidy = pToTest)
-oneTau(c(.02, rep(.1, pToTest+1), .0001), r = mcCounts$counts[1,], a = mcCounts$counts_alt[1,], ploidy = pToTest)
-
-hist(mcCounts[[1]][1,] / (mcCounts[[2]][1,] + mcCounts[[1]][1,]), breaks = 30)
 
 
+#  No noise
+# 6 : 1758.296
+# 4: 1824
 
+# 4: 1746
+# 6: 1809
 
-oneTau(rep(.5, pToTest + 3), r = refCounts[i,], a = altCounts[i,], ploidy = pToTest)
-e <-7
-unique(replicate(1000, oneTau(rep(.5, pToTest + 3), r = refCounts[i,1:e], a = altCounts[i,1:e], ploidy = pToTest)))
+# noise
+# 6 : 1767
+# 4: 1828
 
-unique(replicate(1000, oneTau(rep(.5, pToTest + 3), r = refCounts[i,7], a = altCounts[i,7], ploidy = pToTest)))
+# 4: 1763
+# 6: 1792
 
-
-oneTau(rep(.5, pToTest + 3), r = refCounts[i,7], a = altCounts[i,7], ploidy = pToTest)
-
-
-
-
-
-for(j in which(refCounts[i,] + altCounts[i,] > 0)){
-
-	print(
-		oneTau(rep(.5, pToTest + 3), r = refCounts[i,j], a = altCounts[i,j], ploidy = pToTest)
-	)
+bpoints <- c()
+binpoints <- c()
+for(k in 0:pToTest){
+	# s <- (1 - r2$par[1]) / r2$par[1]
+	s <- (1 - r2$par[k+1]) / r2$par[k+1]
+	p <- k / pToTest
+	p <- p * .99 + (1 - p) * .01
+	bpoints <- c(bpoints, rbeta(1000, p * s, (1-p) * s))
+	binpoints <- c(binpoints, rbeta(1000, p * 1e9, (1-p) * 1e9))
 
 }
 
-refCounts[i,7]
-altCounts[i,7]
+hist(bpoints, breaks = 40, freq = FALSE, add = FALSE, col = "blue")
+hist(binpoints, breaks = 40, freq = FALSE, add = TRUE, col = "red")
+hist(refCounts[i,] / (refCounts[i,] + altCounts[i,]), breaks = 40, freq = FALSE, add = TRUE, col = "gray")
 
-oneTau(rep(.5, pToTest + 3), r = 1636, a = 487, ploidy = pToTest)
-
-llh_calc_BB_noise(1636, 487, rep(tau, 6), rep(1/6, 6), 4, 1, .01)
-
+hist(refCounts[i,] / (refCounts[i,] + altCounts[i,]), breaks = 40, freq = FALSE, add = FALSE, col = "gray")
+hist(bpoints, breaks = 40, freq = FALSE, add = TRUE, col = "blue")
 
 
+pToTest <- 4
+totalGenoProbs2 <- totalGenoProbs
+totalGenoProbs2[,2] <- totalGenoProbs2[,2] + 1000
+mcCounts <- rPloidySamples(2, 10000, pToTest, rep(10,100), genotypeCounts = totalGenoProbs)
+mcCounts <- rPloidySamples(2, 10000, pToTest, rep(10,100), genotypeCounts = totalGenoProbs2)
+
+r2 <- optim(rep(.02, pToTest + 2), oneTau, method = "Nelder-Mead", r = mcCounts$counts[1,],
+		  a = mcCounts$counts_alt[1,], ploidy = pToTest, control = list(maxit=10000))
+
+bpoints <- c()
+binpoints <- c()
+for(k in 0:pToTest){
+	s <- (1 - r2$par[1]) / r2$par[1]
+	p <- k / pToTest
+	p <- p * .99 + (1 - p) * .01
+	bpoints <- c(bpoints, rbeta(1000, p * s, (1-p) * s))
+	binpoints <- c(binpoints, rbeta(1000, p * 1e9, (1-p) * 1e9))
+
+}
+
+hist(bpoints, breaks = 40, freq = FALSE, add = FALSE, col = "blue")
+hist(binpoints, breaks = 40, freq = FALSE, add = TRUE, col = "red")
+hist(mcCounts[[1]][1,] / (mcCounts[[1]][1,] + mcCounts[[2]][1,]), breaks = 40, freq = FALSE, add = TRUE, col = "gray")
+
+
+# Beta-binomial mixture models
+
+r <- refCounts[i,]
+a <- altCounts[i,]
+b <- r+a > 0
+
+BBpolyEM(r[b], a[b], 4, h = rep(1, sum(b)), eps = rep(.01, sum(b)), noise = TRUE,
+	    mdiff = .0001, maxrep = 30)
+
+BBpolyEM(r[b], a[b], 4, h = rep(1, sum(b)), eps = rep(.01, sum(b)), noise = FALSE,
+	    mdiff = .0001, maxrep = 30)
+
+gp4 <- genoProps(refCounts, altCounts, ploidy = 4, h = NULL, eps = NULL,
+				   maxIter = 100, maxDiff = .001, model = "BB_noise")
+gp5 <- genoProps(refCounts, altCounts, ploidy = 5, h = NULL, eps = NULL,
+				   maxIter = 100, maxDiff = .001, model = "BB_noise")
+gp6 <- genoProps(refCounts, altCounts, ploidy = 6, h = NULL, eps = NULL,
+				   maxIter = 100, maxDiff = .001, model = "BB_noise")
+
+llr <- cbind(gp4$LLH, gp5$LLH, gp6$LLH)
+noise <- cbind(gp4$noise, gp5$noise, gp6$noise)
+llr <- t(apply(llr, 1, function(x) round(max(x) - x, 3)))
+
+tolook <- cbind(rownames(refCounts), llr)
+write.table(tolook, "tolook.txt", sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
+write.table(noise, "noise.txt", sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
+
+debugonce(genoProps)
+
+# BB with known
+
+gp4 <- genoProps(refCounts, altCounts, ploidy = 4, h = NULL, eps = NULL,
+				   maxIter = 100, maxDiff = .001, model = "BB_noise")
+gp5 <- genoProps(refCounts, altCounts, ploidy = 5, h = NULL, eps = NULL,
+				   maxIter = 100, maxDiff = .001, model = "BB_noise")
+gp6 <- genoProps(refCounts, altCounts, ploidy = 6, h = NULL, eps = NULL,
+				   maxIter = 100, maxDiff = .001, model = "BB_noise")
+
+llr <- cbind(gp4$LLH, gp5$LLH, gp6$LLH)
+noise <- cbind(gp4$noise, gp5$noise, gp6$noise)
+llr <- t(apply(llr, 1, function(x) round(max(x) - x, 3)))
+tolook <- cbind(rownames(refCounts), llr)
+write.table(tolook, "tolook2.txt", sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
+write.table(noise, "noise2.txt", sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
+
+
+gp4 <- genoProps(refCounts[1:2,], altCounts[1:2,], ploidy = 4, h = NULL, eps = NULL,
+				   maxIter = 100, maxDiff = .001, model = "BB_noise")

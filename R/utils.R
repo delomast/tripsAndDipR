@@ -7,3 +7,29 @@ ranDirich <- function(alphas){
 }
 
 
+tempGrad <- function(tau,
+				 refCounts,
+			altCounts,
+			mixWeights,
+			ploidy,
+			h,
+			eps){
+
+	print("numeric")
+	print(numDeriv::grad(llh_calc_BB_Mstep, tau, refCounts = refCounts,
+			altCounts = altCounts,
+			mixWeights = mixWeights,
+			ploidy = ploidy,
+			h = h,
+			eps = eps))
+	print("analytical")
+	aGrad <- grad_BB_BBnoise(tau, refCounts,
+                                      altCounts,
+                                      mixWeights,
+              ploidy, h, eps)
+	print(aGrad)
+
+	return(aGrad)
+
+}
+
