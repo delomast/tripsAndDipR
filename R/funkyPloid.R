@@ -22,7 +22,10 @@
 #' @param maxIter The maximum number of iterations of the EM algorithm to run for a given sample
 #' @param maxDiff This is the maximum proportional change in log-likelihood from the previous iteration to accept
 #'   as convergence and stop the EM algorithm.
-#'
+#' @param model the model to fit: Bin - mixture of binomials, BB_noise - mixture of
+#'   beta-binomials WITH uniform noise, BB - mixture of beta-binomials WITHOUT uniform noise
+#' @param maxSubIter If \code{model} is BB_noise or BB, this is the maximum number of iterations of to perform during the
+#'   M-step of the EM algorithm.
 #'
 #'
 #' @importFrom Rcpp evalCpp
@@ -30,7 +33,11 @@
 #' @export
 
 funkyPloid <- function(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
-				   maxIter = 10000, maxDiff = .001){
+				   maxIter = 10000, maxDiff = .001, model = c("Bin", "BB_noise", "BB"),
+				  maxSubIter = 500){
+
+	model <- match.arg(model)
+
 	if(!is.matrix(counts)){
 		warning("Coercing counts to a matrix.")
 		counts <- as.matrix(counts)
@@ -65,9 +72,23 @@ funkyPloid <- function(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
 		mLoci[i] <- sum(countBool)
 		if(mLoci[i] > 0){
 			for(p in 1:length(ploidy)){
-				llh[i,p] <- genoEM(refCounts = counts[i,countBool], altCounts = counts_alt[i,countBool],
-					ploidy = ploidy[p], h = h[countBool], eps = eps[countBool],
-					mrep = maxIter, mdiff = maxDiff, returnAll = FALSE)
+				if(model == "Bin"){
+					llh[i,p] <- genoEM(refCounts = counts[i,countBool], altCounts = counts_alt[i,countBool],
+						ploidy = ploidy[p], h = h[countBool], eps = eps[countBool],
+						mrep = maxIter, mdiff = maxDiff, returnAll = FALSE)
+				} else {
+					if (model == "BB_noise") {
+						noise <- TRUE
+					} else if (model == "BB"){
+						noise <- FALSE
+					}
+
+					tempRes <- BBpolyEM(refCounts = counts[i,countBool], altCounts = counts_alt[i,countBool],
+								ploidy = ploidy[p], h = h[countBool], eps = eps[countBool],
+								noise = noise, mdiff = maxDiff, maxrep = maxIter, maxSubIter = maxSubIter)
+
+					llh[i,p] <- tempRes$llh
+				}
 			}
 			# calculate log-likelihood ratios comparing model with max likelihood to all other models
 			llh[i,] <- max(llh[i,]) - llh[i,]

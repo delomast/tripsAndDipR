@@ -1,6 +1,10 @@
+#' function to fit beta-binomial model (with or without noise) via EM
+#'
+#'
+#' @keywords internal
+#' @noRd
 
-
-BBpolyEM <- function(refCounts, altCounts, ploidy, h, eps, noise, mdiff, maxrep){
+BBpolyEM <- function(refCounts, altCounts, ploidy, h, eps, noise, mdiff, maxrep, maxSubIter){
 
 	lastLLH <- -10000
 	repNum <- 0
@@ -18,16 +22,15 @@ BBpolyEM <- function(refCounts, altCounts, ploidy, h, eps, noise, mdiff, maxrep)
 				tau, mix, ploidy, h, eps, noise)
 
 		#  M-step
-		#  optim
-		optimRes <- optim(
+		optimRes <- stats::optim(
 			par = tau,
 			fn = llh_calc_BB_Mstep,
-			gr = tempGrad,
+			gr = grad_BB_BBnoise,
 			method = "L-BFGS-B",
-			lower = 10^-10,
-			upper = 1 - 10^-10,
+			lower = 10^-7,
+			upper = 1 - 10^-7,
 			control = list(
-				maxit = 500,
+				maxit = maxSubIter,
 				fnscale = -1
 			),
 			refCounts = refCounts,

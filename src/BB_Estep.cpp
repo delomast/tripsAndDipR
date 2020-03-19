@@ -32,24 +32,22 @@ Rcpp::NumericVector BB_Estep(Rcpp::NumericVector refCounts, Rcpp::NumericVector 
 	if(noise) numComponents++;
 
 
-	vector <double> ab (2);
-	vector <double> k (2);
+
 	vector <double> oneLocusComps (numComponents);
 	vector <double> componentProps (numComponents, 0);
 
 	for(int i = 0; i < nLoci; i++){
 		double llh_sum;
 
-		k[0] = refCounts[i];
-		k[1] = altCounts[i];
 		for(int j=0, max2=ploidyD+1; j < max2; j++ ){
 			double scale = (1 - tau[j]) / tau[j];
 			double p = j / ploidyD;
 			p = (p)*(1 - eps[i]) + (1 - p)*eps[i];
 			p = p / ((h[i] * (1 - p)) + p);
-			ab[0] = p * scale;
-			ab[1] = (1 - p) * scale;
-			oneLocusComps[j] = logDirichMultPMF(k, ab) + log(mixWeights[j]); // beta-binomials
+
+			oneLocusComps[j] = logBetaBinomPMF(refCounts[i] + altCounts[i],
+                                      refCounts[i], p * scale, (1 - p) * scale) +
+                                      	log(mixWeights[j]); // beta-binomials
 		}
 		if (noise) oneLocusComps[noisePos] = -log(1 + refCounts[i] + altCounts[i]) + log(mixWeights[noisePos]); // uniform noise
 		llh_sum = logSumExp(oneLocusComps);

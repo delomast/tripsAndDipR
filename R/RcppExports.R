@@ -13,14 +13,6 @@ grad_BB_BBnoise <- function(tau, refCounts, altCounts, mixWeights, ploidy, h, ep
     .Call(`_tripsAndDipR_grad_BB_BBnoise`, tau, refCounts, altCounts, mixWeights, ploidy, h, eps)
 }
 
-llh_calc_BB_noise <- function(refCounts, altCounts, tau, mixWeights, ploidy, h, eps) {
-    .Call(`_tripsAndDipR_llh_calc_BB_noise`, refCounts, altCounts, tau, mixWeights, ploidy, h, eps)
-}
-
-llh_calc_BB <- function(refCounts, altCounts, tau, mixWeights, ploidy, h, eps) {
-    .Call(`_tripsAndDipR_llh_calc_BB`, refCounts, altCounts, tau, mixWeights, ploidy, h, eps)
-}
-
 llh_calc_BB_Mstep <- function(tau, refCounts, altCounts, mixWeights, ploidy, h, eps) {
     .Call(`_tripsAndDipR_llh_calc_BB_Mstep`, tau, refCounts, altCounts, mixWeights, ploidy, h, eps)
 }

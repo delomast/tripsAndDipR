@@ -3,36 +3,16 @@
 #' For each sample, this returns the log-likelihood and proportions of each genotype category for a given ploidy value
 #'
 #'
-#' @param counts A numeric matrix with each row corresponding to a different sample.
-#'   There are two options for formatting the input. Either
-#'   the columns correspond to the read counts for each locus, in a two column per locus format:
-#'   column 1 is the read counts for locus1ReferenceAllele, column two is the read counts for locus1AlternateAllele2, locus2Reference, locus2Alternate, ...
-#'   OR this contains read counts for the reference allele, and \code{counts_alt} contains read counts for the alternate allele
-#'   The rownames should be the sample names.
-#' @param counts_alt Either \code{NULL} or a numeric matrix with each row corresponding to a different sample.
-#'   The matrix contains counts for the alternate allele, with samples and loci having the same order as in \code{counts}
-#'   If this parameter is \code{NULL}, \code{counts} is assumed to have both the reference and alternate allele counts.
+#' @inheritParams funkyPloid
 #' @param ploidy The ploidy (as an integer) to fit.
-#' @param h Either \code{NULL}, or a numeric vector of h values for each locus in the same order that the loci are ordered in counts.
-#'   These h values are as defined by Gerard et al. (2018) "Genotyping polyploids from messy sequencing data" Genetics 210:789-807.
-#'   with h expressed as alternate / reference. These values can be estimated using the R package "updog". If \code{NULL},
-#'   h values of 1 (unbiased) are used for all loci.
-#' @param eps Either \code{NULL}, or a numeric vector of values for the error rate per read for each locus in the same
-#'   order that the loci are ordered in counts.
-#'   These are expressed as proportions, so a rate of 1\% should be given as 0.01. These values can be
-#'   estimated using the R package "updog". If \code{NULL}, error rates of .01 are assumed for all loci.
-#' @param maxIter The maximum number of iterations of the EM algorithm to run for a given sample
-#' @param maxDiff This is the maximum proportional change in log-likelihood from the previous iteration to accept
-#'   as convergence and stop the EM algorithm.
-#' @param model the model to fit: Bin - mixture of binomials, BB_noise - mixture of
-#'   beta-binomials WITH uniform noise, BB - mixture of beta-binomials WITHOUT uniform noise
 #'
 #'
 #'
 #' @export
 
 genoProps <- function(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
-				   maxIter = 10000, maxDiff = .001, model = c("Bin", "BB_noise", "BB")){
+				   maxIter = 10000, maxDiff = .001, model = c("Bin", "BB_noise", "BB"),
+				  maxSubIter = 500){
 
 	model <- match.arg(model)
 
@@ -90,12 +70,7 @@ genoProps <- function(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
 
 				tempRes <- BBpolyEM(refCounts = counts[i,countBool], altCounts = counts_alt[i,countBool],
 							ploidy = ploidy, h = h[countBool], eps = eps[countBool],
-							noise = noise, mdiff = maxDiff, maxrep = maxIter)
-				if(tempRes$optimRes$convergence == 1) warning("M step failed to converge on last iteration for ",
-													 rownames(counts)[i])
-				if(!tempRes$optimRes$convergence %in% c(0,1)) warning("warning from optim during last step for ",
-					rownames(counts)[i], ": ", tempRes$OptimRes$message)
-
+							noise = noise, mdiff = maxDiff, maxrep = maxIter, maxSubIter = maxSubIter)
 				results[i,] <- c(tempRes$llh, tempRes$mixProps, tempRes$tau, tempRes$reps)
 			}
 		}

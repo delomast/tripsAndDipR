@@ -5,10 +5,11 @@
 
 using namespace std;
 
-// need to change all of this
-// can't calculate on the log scale b/c can be negative
-// looks like need to use second option of calculating derive of logBB
-
+/*
+ * Calculating the gradient of the log-likelihood of the mixture of beta-binomials
+ * With or without noise
+ * passed to optim for L-BFGS-B optimization
+ */
 
 // derivative of log of beta - binomial wrt alpha
 double dl_betabinom_dalpha(const double& n, const double& k, const double& alpha, const double& beta){
@@ -67,16 +68,13 @@ Rcpp::NumericVector grad_BB_BBnoise(Rcpp::NumericVector tau, Rcpp::NumericVector
 			p = (p)*(1 - eps[i]) + (1 - p)*eps[i];
 			p = p / ((h[i] * (1 - p)) + p);
 
+			// derivatives of alpha and beta wrt tau
 			double dalpha_dt = -p / pow(tau[t], 2);
 			double dbeta_dt = -(1 - p) / pow(tau[t], 2);
 
 			double scale = (1 - tau[t]) / tau[t];
 			double alpha = p * scale;
 			double beta = (1 - p) * scale;
-
-// if(i == 0) Rcpp::Rcout << " " << log(mixWeights[t]) << " " << l_dbetabinom_dalpha(n, refCounts[i], alpha, beta) << " " <<
-// 	log_likelihood<< " " << log(dalpha_dt) << " " << l_dbetabinom_dbeta(n, refCounts[i], alpha, beta) << " " <<
-// 		log(dbeta_dt) << "\n\n";
 
 			// dLLH/dalpha * dalpha/dtau + dLLH/dbeta*dbeta/dtau
 			gradient[t] += exp(llh_comps[t] - log_likelihood) * ((dl_betabinom_dalpha(n, refCounts[i], alpha, beta) * dalpha_dt) +

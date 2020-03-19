@@ -11,8 +11,7 @@ using namespace std;
 
 
 // This runs EM for a given individual and ploidy, then returns the log-likelihood at the maximum
-// with log sum exp
-// WITHOUT uniform noise component
+//  optionally returns all mixture component weights as well
 
 // [[Rcpp::export]]
 Rcpp::NumericVector genoEM(Rcpp::NumericVector refCounts, Rcpp::NumericVector altCounts,
