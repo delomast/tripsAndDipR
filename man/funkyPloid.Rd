@@ -5,7 +5,8 @@
 \title{calculate LLR's for a group of samples and a given set of ploidy values}
 \usage{
 funkyPloid(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
-  maxIter = 10000, maxDiff = 0.001)
+  maxIter = 10000, maxDiff = 0.001, model = c("Bin", "BB_noise",
+  "BB"), maxSubIter = 500)
 }
 \arguments{
 \item{counts}{A numeric matrix with each row corresponding to a different sample.
@@ -35,6 +36,12 @@ estimated using the R package "updog". If \code{NULL}, error rates of .01 are as
 
 \item{maxDiff}{This is the maximum proportional change in log-likelihood from the previous iteration to accept
 as convergence and stop the EM algorithm.}
+
+\item{model}{the model to fit: Bin - mixture of binomials, BB_noise - mixture of
+beta-binomials WITH uniform noise, BB - mixture of beta-binomials WITHOUT uniform noise}
+
+\item{maxSubIter}{If \code{model} is BB_noise or BB, this is the maximum number of iterations of to perform during the
+M-step of the EM algorithm.}
 }
 \description{
 calculate LLR's for a group of samples and a given set of ploidy values
