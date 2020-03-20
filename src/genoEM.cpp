@@ -47,7 +47,7 @@ Rcpp::NumericVector genoEM(Rcpp::NumericVector refCounts, Rcpp::NumericVector al
 
 	// EM to infer genotype category proportions and calculate likelihood
 	double llh;
-	double lastLlh = -10000; // prevent division by 0 in first rep, but at least two reps are run if mrep > 1
+	double lastLlh = -10000;
 	int repNum = 0;
 	while(repNum < mrep){
 		if(repNum % 100 == 0) Rcpp::checkUserInterrupt();
@@ -64,7 +64,7 @@ Rcpp::NumericVector genoEM(Rcpp::NumericVector refCounts, Rcpp::NumericVector al
 			llh += rSum;
 			for(int j = 0, max2 = ploidyD + 1; j < max2; j++) catCounts[j] += exp(genoProbs[j] - rSum);
 		}
-		if ((lastLlh - llh) / lastLlh < mdiff && repNum > 0) break;
+		if (abs(lastLlh - llh) < mdiff && repNum > 0) break;
 		lastLlh = llh;
 
 		// E-step

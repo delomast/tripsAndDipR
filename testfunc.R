@@ -634,8 +634,8 @@ genosFiles <- dir(path = "S:\\Eagle Fish Genetics Lab\\Tom\\sturgeon ploidy\\plo
 genosFiles <- paste0("S:\\Eagle Fish Genetics Lab\\Tom\\sturgeon ploidy\\ploidy_genos\\",
 				 genosFiles)
 
-refCounts <- matrix(nrow = 0, ncol = 325)
-altCounts <- matrix(nrow = 0, ncol = 325)
+refCounts2 <- matrix(nrow = 0, ncol = 325)
+altCounts2 <- matrix(nrow = 0, ncol = 325)
 sName_true <- c()
 for(f in genosFiles){
 	rReads <- c() # ref
@@ -661,20 +661,24 @@ for(f in genosFiles){
 	# save data, use names to make sure all in same order
 	names(rReads) <- mNames
 	names(aReads) <- mNames
-	refCounts <- rbind(refCounts, rReads)
-	altCounts <- rbind(altCounts, aReads)
-	rownames(refCounts)[nrow(refCounts)] <- sName
-	rownames(altCounts)[nrow(altCounts)] <- sName
+	refCounts2 <- rbind(refCounts2, rReads)
+	altCounts2 <- rbind(altCounts2, aReads)
+	rownames(refCounts2)[nrow(refCounts2)] <- sName
+	rownames(altCounts2)[nrow(altCounts2)] <- sName
 
 
 }
 
 
+fp <- t
+system.time(
+funkyPloid(refCounts2[1:2,], altCounts2[1:2,], ploidy = c(4,5,6), h = NULL, eps = NULL,
+				   maxIter = 100, maxDiff = .0001, model = "BB_noise")
+)
+genoProps(refCounts2[1:2,], altCounts2[1:2,], ploidy = c(6), h = NULL, eps = NULL,
+				   maxIter = 100, maxDiff = .2, model = "BB_noise")
 
-fp <- funkyPloid(refCounts, altCounts, ploidy = c(4,5,6), h = NULL, eps = NULL,
-				   maxIter = 100, maxDiff = .001, model = "BB_noise")
-
-write.table(fp, "knownPloidy_BBNOISE.txt", sep = "\t", quote = FALSE, col.names = TRUE, row.names = FALSE)
+write.table(fp, "knownPloidy_BBNOISE_2.txt", sep = "\t", quote = FALSE, col.names = TRUE, row.names = FALSE)
 
 fours <- fp$Ind[fp$LLR_4 == 0]
 
@@ -692,3 +696,51 @@ g8k4l <- genoProps(t(refCounts[fours,])[1:5,], t(altCounts[fours,])[1:5,], ploid
 
 hist(refCounts[fours,"Atr_10437-26"] / (refCounts[fours,"Atr_10437-26"] + altCounts[,"Atr_10437-26"]),
 	breaks = 30)
+hist(refCounts["i095_73_P7456_WSTG2017-3HF4_OE5ExO610",] /
+		(refCounts["i095_73_P7456_WSTG2017-3HF4_OE5ExO610",] + altCounts["i095_73_P7456_WSTG2017-3HF4_OE5ExO610",]),
+	breaks = 30)
+
+# devtools::install_github("delomast/tripsAndDipR")
+library(tripsAndDipR)
+funkyPloid(refCounts[1:5,], altCounts[1:5,], ploidy = c(4,5,6), h = NULL, eps = NULL,
+				   maxIter = 100, maxDiff = .001, model = "Bin")
+genoProps(refCounts[1:5,], altCounts[1:5,], ploidy = c(5), h = NULL, eps = NULL,
+				   maxIter = 100, maxDiff = .001, model = "BB_")
+
+fp <- funkyPloid(refCounts, altCounts, ploidy = c(4,5,6), h = NULL, eps = NULL,
+				   maxIter = 100, maxDiff = .001, model = "BB_noise")
+
+gp <- genoProps(refCounts, altCounts, ploidy = c(5), h = NULL, eps = NULL,
+				   maxIter = 100, maxDiff = .001, model = "BB_noise")
+
+
+tTest <- funkyPloid(refCounts, altCounts, ploidy = c(4,5,6), h = NULL, eps = NULL,
+				   maxIter = 100, maxDiff = .001, model = "BB_noise")
+
+funkyPloid(refCounts["WSTGUCD20-UNK_C_1X.genos", , drop = FALSE], altCounts["WSTGUCD20-UNK_C_1X.genos", , drop = FALSE],
+		 ploidy = c(4,5,6), h = NULL, eps = NULL,
+				   maxIter = 100, maxDiff = .001, model = "BB_noise")
+
+genoProps(refCounts["WSTGUCD20-UNK_C_1X.genos", , drop = FALSE], altCounts["WSTGUCD20-UNK_C_1X.genos", , drop = FALSE],
+		ploidy = c(6), h = NULL, eps = NULL,
+				   maxIter = 100, maxDiff = .001, model = "BB_noise")
+
+write.table(tTest, "tempttest.txt", sep = "\t", quote = FALSE, col.names = TRUE, row.names = FALSE)
+
+
+testing <- replicate(100, genoProps(refCounts["WSTGUCD20-UNK_C_1X.genos", , drop = FALSE], altCounts["WSTGUCD20-UNK_C_1X.genos", , drop = FALSE],
+		ploidy = c(4), h = NULL, eps = NULL,
+				   maxIter = 100, maxDiff = .001, model = "BB_noise"))
+t2 <- replicate(10, genoProps(refCounts["WSTGUCD20-UNK_C_1X.genos", , drop = FALSE], altCounts["WSTGUCD20-UNK_C_1X.genos", , drop = FALSE],
+		ploidy = c(4), h = NULL, eps = NULL,
+				   maxIter = 100, maxDiff = .001, model = "BB_noise"))
+
+te <- t(as.matrix(testing[1,,]))
+apply(te, 1, function(x) identical(te[1,], x))
+
+identical(te[1,], t2[1,,1])
+
+funkyPloid(refCounts2["WSTGUCD20-UNK_C_1X.genos", , drop = FALSE], altCounts2["WSTGUCD20-UNK_C_1X.genos", , drop = FALSE],
+		 ploidy = c(4,5,6), h = NULL, eps = NULL,
+				   model = "BB_noise", maxSubIter = 100)
+funk

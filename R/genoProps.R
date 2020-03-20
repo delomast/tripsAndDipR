@@ -11,7 +11,7 @@
 #' @export
 
 genoProps <- function(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
-				   maxIter = 10000, maxDiff = .001, model = c("Bin", "BB_noise", "BB"),
+				   maxIter = 10000, maxDiff = .0001, model = c("Bin", "BB_noise", "BB"),
 				  maxSubIter = 500){
 
 	model <- match.arg(model)

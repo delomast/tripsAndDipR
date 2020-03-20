@@ -44,7 +44,7 @@ BBpolyEM <- function(refCounts, altCounts, ploidy, h, eps, noise, mdiff, maxrep,
 
 		repNum <- repNum + 1
 		# check llh
-		if((lastLLH - optimRes$value) / lastLLH < mdiff && repNum > 1) break
+		if(abs(lastLLH - optimRes$value) < mdiff && repNum > 1) break
 		lastLLH <- optimRes$value
 
 	}

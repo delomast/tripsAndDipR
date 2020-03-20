@@ -5,7 +5,7 @@
 \title{Fit the model for one ploidy}
 \usage{
 genoProps(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
-  maxIter = 10000, maxDiff = 0.001, model = c("Bin", "BB_noise",
+  maxIter = 10000, maxDiff = 1e-04, model = c("Bin", "BB_noise",
   "BB"), maxSubIter = 500)
 }
 \arguments{
@@ -34,7 +34,7 @@ estimated using the R package "updog". If \code{NULL}, error rates of .01 are as
 
 \item{maxIter}{The maximum number of iterations of the EM algorithm to run for a given sample}
 
-\item{maxDiff}{This is the maximum proportional change in log-likelihood from the previous iteration to accept
+\item{maxDiff}{This is the maximum change in log-likelihood from the previous iteration to accept
 as convergence and stop the EM algorithm.}
 
 \item{model}{the model to fit: Bin - mixture of binomials, BB_noise - mixture of

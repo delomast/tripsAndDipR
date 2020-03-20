@@ -20,7 +20,7 @@
 #'   These are expressed as proportions, so a rate of 1\% should be given as 0.01. These values can be
 #'   estimated using the R package "updog". If \code{NULL}, error rates of .01 are assumed for all loci.
 #' @param maxIter The maximum number of iterations of the EM algorithm to run for a given sample
-#' @param maxDiff This is the maximum proportional change in log-likelihood from the previous iteration to accept
+#' @param maxDiff This is the maximum change in log-likelihood from the previous iteration to accept
 #'   as convergence and stop the EM algorithm.
 #' @param model the model to fit: Bin - mixture of binomials, BB_noise - mixture of
 #'   beta-binomials WITH uniform noise, BB - mixture of beta-binomials WITHOUT uniform noise
@@ -33,7 +33,7 @@
 #' @export
 
 funkyPloid <- function(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
-				   maxIter = 10000, maxDiff = .001, model = c("Bin", "BB_noise", "BB"),
+				   maxIter = 10000, maxDiff = .0001, model = c("Bin", "BB_noise", "BB"),
 				  maxSubIter = 500){
 
 	model <- match.arg(model)
