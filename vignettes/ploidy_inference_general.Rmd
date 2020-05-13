@@ -1,0 +1,75 @@
+---
+title: "Ploidy Inference"
+author: "Thomas Delomas"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This vignette will cover infering ploidy of samples from NGS data for any levels of ploidy considered. If you just want to compare 2n and 3n, you can either use the method described here or the binomial likelihood based method described by Delomas (2019) https://doi.org/10.1111/1755-0998.13073 available in the function `tripsAndDip` within this package.
+
+First, we load the tripsAndDipR package.
+```{r}
+library(tripsAndDipR)
+```
+
+Now, you would load you read count data, but here we are just going to quickly simulate some data for two individuals, one 4n and one 5n.
+
+```{r}
+# this data is simulated to be quick to produce, not to be a very good method of simulating NGS data
+set.seed(7)
+refCounts4n <- c(rbinom(6, 100, .01), rbinom(6, 100, .25), 
+			  rbinom(6, 100, .5), rbinom(6, 100, .75), rbinom(6, 100, .99))
+refCounts5n <- c(rbinom(5, 100, .01), rbinom(5, 100, .2), 
+			  rbinom(5, 100, .4), rbinom(5, 100, .6), rbinom(5, 100, .8), rbinom(5, 100, .99))
+refCounts <- rbind(refCounts4n, refCounts5n)
+altCounts <- rbind(100 - refCounts4n, 100 - refCounts5n)
+rownames(altCounts) <- rownames(refCounts) <- c("sample_4n", "sample_5n")
+colnames(refCounts) <- colnames(altCounts) <- paste0("Locus_", 1:30)
+refCounts[,1:5]
+altCounts[,1:5]
+
+```
+
+Now we have two matrices, with rows being samples and columns being loci. One matrix, `refCounts`, has the counts of the refernce allele and `altCounts` has the counts of the alternate allele. If a sample has no counts for a given locus, then both matrices will have 0 for that sample/locus.
+
+Now, let's say our samples could be 4n, 5n, or 6n. To use a beta-binomial mixture model with a uniform noise component, adn assuming no allelic bias and all sequencing error rates of .01,
+
+```{r}
+fp <- funkyPloid(refCounts, altCounts, ploidy = c(4,5,6), model = "BB_noise")
+fp
+```
+
+The returned dataframe has the sample name, the number of loci with 1 or more read, and the log-likelihood ratios between the most likely model and the given model. The most likely model will have an LLR of 0 (we see that the most likely model was correct for both in this example). Now you just decide if the other LLR's are high enough for you to reject the less likely models. If you want to eliminate the noise component or use the binomial mixture model, you can change the `model` argument. For using different values of allelic bias and sequencing error, see the `h` and `eps` arguments.
+
+If you are interested in the actual parameter values of the fit models, not just the LLRs, you can
+
+```{r}
+model_4n <- genoProps(refCounts, altCounts, ploidy = 4, model = "BB_noise")
+model_5n <- genoProps(refCounts, altCounts, ploidy = 5, model = "BB_noise")
+model_6n <- genoProps(refCounts, altCounts, ploidy = 6, model = "BB_noise")
+# let's take a look at one of the ploidies
+model_4n
+```
+
+The columns are:
+
+* Ind: sample name
+* Loci: number of loci with 1 or more reads
+* numIter: the number of iterations of the EM algorithm
+* LLH: the log-likelihood of the model
+* ref_x: the weight of the component representing x copies of the reference allele
+* noise: the weight of the noise component
+* tau_x: the value of $\tau$ (the overdisperison parameter) for the state of x copies of the reference allele
+
+
