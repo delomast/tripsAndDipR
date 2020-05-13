@@ -22,8 +22,9 @@
 #' @param maxIter The maximum number of iterations of the EM algorithm to run for a given sample
 #' @param maxDiff This is the maximum change in log-likelihood from the previous iteration to accept
 #'   as convergence and stop the EM algorithm.
-#' @param model the model to fit: Bin - mixture of binomials, BB_noise - mixture of
-#'   beta-binomials WITH uniform noise, BB - mixture of beta-binomials WITHOUT uniform noise
+#' @param model the model to fit: BB_noise - mixture of
+#'   beta-binomials WITH uniform noise, BB - mixture of beta-binomials WITHOUT uniform noise,
+#'   Bin - mixture of binomials
 #' @param maxSubIter If \code{model} is BB_noise or BB, this is the maximum number of iterations of to perform during the
 #'   M-step of the EM algorithm.
 #'
@@ -33,7 +34,7 @@
 #' @export
 
 funkyPloid <- function(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
-				   maxIter = 10000, maxDiff = .0001, model = c("Bin", "BB_noise", "BB"),
+				   maxIter = 10000, maxDiff = .0001, model = c("BB_noise", "BB", "Bin"),
 				  maxSubIter = 500){
 
 	model <- match.arg(model)
