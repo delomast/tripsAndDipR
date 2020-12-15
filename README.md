@@ -3,7 +3,7 @@ Uses read counts for biallelic SNPs to determine ploidy
 
 Install with:  
 ```
-devtool::install_github("delomast/tripsAndDipR")
+devtools::install_github("delomast/tripsAndDipR")
 ```
 
 To install and view the vignette:
