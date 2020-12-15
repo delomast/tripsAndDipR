@@ -4,8 +4,16 @@
 \alias{rPloidySamples}
 \title{simulate read counts for random samples}
 \usage{
-rPloidySamples(nSamps, reads, truePloidy, alpha, eps = NULL, h = NULL,
-  genotypeCounts, genotypePropsAreKnown = FALSE)
+rPloidySamples(
+  nSamps,
+  reads,
+  truePloidy,
+  alpha,
+  eps = NULL,
+  h = NULL,
+  genotypeCounts,
+  genotypePropsAreKnown = FALSE
+)
 }
 \arguments{
 \item{nSamps}{number of samples to simulate}

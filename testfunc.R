@@ -61,7 +61,14 @@ for(f in genosFiles){
 # save(refCounts, altCounts, file = "sturgeonData.rda")
 load("sturgeonData.rda")
 
-fpTest <- funkyPloid(refCounts[1:2,], altCounts[1:2,], ploidy = c(4,6), maxRep = 10000, maxDiff = .0001)
+fpTest <- funkyPloid(refCounts[1:2,], altCounts[1:2,], ploidy = c(4,5,6))
+fpTestIC <- funkyPloid(refCounts[1:2,], altCounts[1:2,], ploidy = c(4,5,6), IC = TRUE)
+
+genoProps(refCounts[1:2,], altCounts[1:2,], ploidy = 4)
+genoProps(refCounts[1:2,], altCounts[1:2,], ploidy = 4, IC = TRUE, model = "Bin")
+
+
+
 
 mB <- refCounts[1,] + altCounts[1,] > 0
 genoEM(refCounts[1,mB], altCounts[1,mB],

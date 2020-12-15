@@ -4,8 +4,15 @@
 \alias{tripsAndDip}
 \title{Uses read counts for biallelic SNPs to determine if a sample is diploid or triploid}
 \usage{
-tripsAndDip(counts, counts_alt = NA, h, eps, min_reads = 30,
-  min_loci = 15, binom_p_value = 0.05)
+tripsAndDip(
+  counts,
+  counts_alt = NA,
+  h,
+  eps,
+  min_reads = 30,
+  min_loci = 15,
+  binom_p_value = 0.05
+)
 }
 \arguments{
 \item{counts}{Either a numeric matrix or a dataframe with each row corresponding to a different sample.

@@ -4,9 +4,18 @@
 \alias{funkyPloid}
 \title{calculate LLR's for a group of samples and a given set of ploidy values}
 \usage{
-funkyPloid(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
-  maxIter = 10000, maxDiff = 1e-04, model = c("BB_noise", "BB",
-  "Bin"), maxSubIter = 500)
+funkyPloid(
+  counts,
+  counts_alt = NULL,
+  ploidy,
+  h = NULL,
+  eps = NULL,
+  maxIter = 10000,
+  maxDiff = 1e-04,
+  model = c("BB_noise", "BB", "Bin"),
+  maxSubIter = 500,
+  IC = FALSE
+)
 }
 \arguments{
 \item{counts}{A numeric matrix with each row corresponding to a different sample.
@@ -43,6 +52,8 @@ Bin - mixture of binomials}
 
 \item{maxSubIter}{If \code{model} is BB_noise or BB, this is the maximum number of iterations of to perform during the
 M-step of the EM algorithm.}
+
+\item{IC}{\code{TRUE} to calculate AIC and BIC.}
 }
 \description{
 calculate LLR's for a group of samples and a given set of ploidy values

@@ -12,7 +12,7 @@
 
 genoProps <- function(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
 				   maxIter = 10000, maxDiff = .0001, model = c("BB_noise", "BB", "Bin"),
-				  maxSubIter = 500){
+				  maxSubIter = 500, IC = FALSE){
 
 	model <- match.arg(model)
 
@@ -94,6 +94,19 @@ genoProps <- function(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
 			colnames(output)[(5+ploidy+1):ncol(output)] <- paste0("tau_", 0:ploidy)
 		}
 	}
-
+	if(IC){
+		icValues <- matrix(NA, nrow = nrow(counts), ncol = 2)
+		nParam <- ploidy + 1 # number of component weights
+		if(model %in% c("BB_noise", "BB")){
+			nParam <- nParam + ploidy + 1 # number of tau's
+			if(model == "BB_noise") nParam <- nParam + 1 # one extra component weight
+		}
+		# AIC
+		icValues[,1] <- (2 * nParam) - (2 * output$LLH)
+		# BIC
+		icValues[,2] <- (nParam * log(output$Loci)) - (2 * output$LLH)
+		colnames(icValues) <- c("AIC", "BIC")
+		output <- cbind(output, icValues)
+	}
 	return(output)
 }

@@ -27,6 +27,7 @@
 #'   Bin - mixture of binomials
 #' @param maxSubIter If \code{model} is BB_noise or BB, this is the maximum number of iterations of to perform during the
 #'   M-step of the EM algorithm.
+#' @param IC \code{TRUE} to calculate AIC and BIC.
 #'
 #'
 #' @importFrom Rcpp evalCpp
@@ -35,7 +36,7 @@
 
 funkyPloid <- function(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
 				   maxIter = 10000, maxDiff = .0001, model = c("BB_noise", "BB", "Bin"),
-				  maxSubIter = 500){
+				  maxSubIter = 500, IC = FALSE){
 
 	model <- match.arg(model)
 
@@ -67,30 +68,40 @@ funkyPloid <- function(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
 
 	# calculate log-likelihoods
 	llh <- matrix(NA, nrow = nrow(counts), ncol = length(ploidy))
+	if(IC) icValues <- matrix(NA, nrow = nrow(counts), ncol = 2 * length(ploidy))
 	mLoci <- rep(NA, nrow(counts))
 	for(i in 1:nrow(counts)){
 		countBool <- counts[i,] + counts_alt[i,] > 0 # only use loci with reads
 		mLoci[i] <- sum(countBool)
 		if(mLoci[i] > 0){
 			for(p in 1:length(ploidy)){
+				nParam <- ploidy[p] + 1 # number of component weights
 				if(model == "Bin"){
 					llh[i,p] <- genoEM(refCounts = counts[i,countBool], altCounts = counts_alt[i,countBool],
 						ploidy = ploidy[p], h = h[countBool], eps = eps[countBool],
 						mrep = maxIter, mdiff = maxDiff, returnAll = FALSE)
 				} else {
+					nParam <- nParam + ploidy[p] + 1 # number of tau's
 					if (model == "BB_noise") {
 						noise <- TRUE
+						nParam <- nParam + 1 # one extra component weight
 					} else if (model == "BB"){
 						noise <- FALSE
 					}
-
 					tempRes <- BBpolyEM(refCounts = counts[i,countBool], altCounts = counts_alt[i,countBool],
 								ploidy = ploidy[p], h = h[countBool], eps = eps[countBool],
 								noise = noise, mdiff = maxDiff, maxrep = maxIter, maxSubIter = maxSubIter)
-
 					llh[i,p] <- tempRes$llh
 				}
+				# calculate AIC and BIC
+				if(IC){
+					# AIC
+					icValues[i,p] <- (2 * nParam) - (2 * llh[i,p])
+					# BIC
+					icValues[i,p + length(ploidy)] <- (nParam * log(mLoci[i])) - (2 * llh[i,p])
+				}
 			}
+
 			# calculate log-likelihood ratios comparing model with max likelihood to all other models
 			llh[i,] <- max(llh[i,]) - llh[i,]
 		}
@@ -104,6 +115,12 @@ funkyPloid <- function(counts, counts_alt = NULL, ploidy, h = NULL, eps = NULL,
 		llhOutput$Ind <- paste0("Row_", 1:nrow(counts))
 	}
 	colnames(llhOutput)[3:ncol(llhOutput)] <- paste0("LLR_", ploidy)
+
+	# AIC and BIC
+	if(IC){
+		colnames(icValues) <- c(paste0("AIC_", ploidy), paste0("BIC_", ploidy))
+		llhOutput <- cbind(llhOutput, icValues)
+	}
 
 	return(llhOutput)
 }
