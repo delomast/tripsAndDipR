@@ -41,16 +41,16 @@ altCounts[,1:5]
 
 ```
 
-Now we have two matrices, with rows being samples and columns being loci. One matrix, `refCounts`, has the counts of the refernce allele and `altCounts` has the counts of the alternate allele. If a sample has no counts for a given locus, then both matrices will have 0 for that sample/locus.
+Now we have two matrices, with rows being samples and columns being loci. One matrix, `refCounts`, has the counts of the reference allele and `altCounts` has the counts of the alternate allele. If a sample has no counts for a given locus, then both matrices will have 0 for that sample/locus.
 
-Now, let's say our samples could be 4n, 5n, or 6n. To use a beta-binomial mixture model with a uniform noise component, adn assuming no allelic bias and all sequencing error rates of .01,
+Now, let's say our samples could be 4n, 5n, or 6n. To use a beta-binomial mixture model with a uniform noise component, and assuming no allelic bias and all sequencing error rates of .01,
 
 ```{r}
 fp <- funkyPloid(refCounts, altCounts, ploidy = c(4,5,6), model = "BB_noise")
 fp
 ```
 
-The returned dataframe has the sample name, the number of loci with 1 or more read, and the log-likelihood ratios between the most likely model and the given model. The most likely model will have an LLR of 0 (we see that the most likely model was correct for both in this example). Now you just decide if the other LLR's are high enough for you to reject the less likely models. If you want to eliminate the noise component or use the binomial mixture model, you can change the `model` argument. For using different values of allelic bias and sequencing error, see the `h` and `eps` arguments.
+Note that you can also have AIC and BIC values returned by adding the argument `IC = TRUE` for `funkyPloid`. The returned dataframe has the sample name, the number of loci with 1 or more read, and the log-likelihood ratios between the most likely model and the given model. The most likely model will have an LLR of 0 (we see that the most likely model was correct for both in this example). For strategies to deal with uncertainty and quantitatively evaluate the LLR's, please see the manuscript describing the implemented method (currently submitted, vignette will be updated). If you want to eliminate the noise component or use the binomial mixture model, you can change the `model` argument. For using different values of allelic bias and sequencing error, see the `h` and `eps` arguments.
 
 If you are interested in the actual parameter values of the fit models, not just the LLRs, you can
 
@@ -72,4 +72,4 @@ The columns are:
 * noise: the weight of the noise component
 * tau_x: the value of $\tau$ (the overdisperison parameter) for the state of x copies of the reference allele
 
-
+You can optionally have AIC and BIC calculated by adding the argument `IC = TRUE` for `genoProps`.
