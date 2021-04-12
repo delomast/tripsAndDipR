@@ -5,6 +5,6 @@
 #'
 #'
 ranDirich <- function(alphas){
-	gammas <- sapply(alphas, function(a) rgamma(1,a))
+	gammas <- sapply(alphas, function(a) stats::rgamma(1,a))
 	return(gammas / sum(gammas))
 }

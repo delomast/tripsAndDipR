@@ -34,7 +34,7 @@ rPloidySamples <- function(nSamps, reads, truePloidy, alpha, eps = NULL, h = NUL
 	if(is.null(eps)) eps <- rep(.01, length(alpha))
 	if(length(h) != length(alpha)) stop("h must be the same length as the number of loci.")
 	if(length(h) != length(eps)) stop("h and eps must have the same length.")
-	if(length(ploidy) != 1) stop("Only one ploidy can be specified for this function.")
+	if(length(truePloidy) != 1) stop("Only one ploidy can be specified for this function.")
 	if(!isTRUE(all.equal(0, truePloidy %% 1))) stop("truePloidy must be an integer")
 	if(ncol(genotypeCounts) != truePloidy + 1) stop("genotypeCounts must have truePloidy + 1 columns")
 	if(nrow(genotypeCounts) != length(alpha)) stop("genotypeCounts must have one row for each locus")
@@ -49,7 +49,7 @@ rPloidySamples <- function(nSamps, reads, truePloidy, alpha, eps = NULL, h = NUL
 
 
 		# draw proportions for each locus and reads per locus
-		rpl <- as.vector(rmultinom(1, reads, ranDirich(alphas = alpha)))
+		rpl <- as.vector(stats::rmultinom(1, reads, ranDirich(alphas = alpha)))
 
 		rRef <- rep(NA, length(alpha))
 		for(i in 1:length(alpha)){
@@ -63,7 +63,7 @@ rPloidySamples <- function(nSamps, reads, truePloidy, alpha, eps = NULL, h = NUL
 			pTemp <- geno/truePloidy
 			pTemp <- (pTemp)*(1 - eps[i]) + (1 - pTemp)*eps[i]
 			pTemp <- pTemp / ((h[i] * (1 - pTemp)) + pTemp);
-			rRef[i] <- rbinom(1, rpl[i], pTemp)
+			rRef[i] <- stats::rbinom(1, rpl[i], pTemp)
 		}
 
 		# save read counts
