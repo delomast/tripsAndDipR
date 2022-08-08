@@ -18,7 +18,7 @@
 #'   The rownames should be the sample names.
 #' @param counts_alt This is a numeric matrix or a dataframe with each row corresponding to a different sample.
 #'   The matrix contains counts for the alternate allele, with samples and loci having the same order as in \code{counts}
-#'   If this parameter is NA or NULL, \code{counts} is assumed to have both the reference and alternate allele counts.
+#'   If this parameter is NULL, \code{counts} is assumed to have both the reference and alternate allele counts.
 #' @param h A numeric vector of h values for each locus in the same order that the loci are ordered in counts.
 #'   These h values are as defined by Gerard et al. (2018) "Genotyping polyploids from messy sequencing data" Genetics 210:789-807.
 #'   with h expressed as alternate / reference. These values can be estimated using the R package "updog".
@@ -53,12 +53,12 @@
 #' ploidy <- tripsAndDip(allele_counts, h = h_constant, eps = eps_constant)
 #' @export
 
-tripsAndDip <- function(counts, counts_alt = NA, h, eps, min_reads = 30, min_loci = 15, binom_p_value = .05){
+tripsAndDip <- function(counts, counts_alt = NULL, h, eps, min_reads = 30, min_loci = 15, binom_p_value = .05){
 	### input error checking
 	if(!is.matrix(counts) && !is.data.frame(counts)){
 		stop("Error. counts must be either a matrix or a dataframe.")
 	}
-	if(is.na(counts_alt) || is.null(counts_alt)){
+	if(is.null(counts_alt)){
 		if((ncol(counts)/2) != length(h)){
 			stop("Error. The number of columns of counts is not equal to twice the length of h.")
 		}
