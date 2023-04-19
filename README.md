@@ -5,8 +5,7 @@ Citation for function `tripsAndDip()`: Delomas, T.A. 2019. Differentiating diplo
 triploid individuals using single nucleotide polymorphisms genotyped by amplicon 
 sequencing. Molecular Ecology Resources. https://doi.org/10.1111/1755-0998.13073
 
-Citation for functions `funkyPloid()` and `genoProps()`: Delomas, T.A., Willis, S.C., 
-Parker, B.L., Miller, D., Anders, P., Schreier, A., and Narum, S. 2021. Genotyping single 
+Citation for functions `funkyPloid()` and `genoProps()`: Delomas, T.A., et al. 2021. Genotyping single 
 nucleotide polymorphisms and inferring ploidy by amplicon sequencing for polyploid, 
 ploidy-variable organisms. Molecular Ecology Resources. https://doi.org/10.1111/1755-0998.13431
 
